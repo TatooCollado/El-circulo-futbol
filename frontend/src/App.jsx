@@ -4,6 +4,7 @@ import { HomePage } from "./pages/HomePage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { RegisterPage } from "./pages/RegisterPage.jsx";
 import { CanchasPage } from "./pages/CanchasPage.jsx";
+import { ReservarCanchaPage } from "./pages/ReservarCanchaPage.jsx";
 import { MisReservasPage } from "./pages/MisReservasPage.jsx";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage.jsx";
 import { SuperAdminUsersPage } from "./pages/SuperAdminUsersPage.jsx";
@@ -17,6 +18,14 @@ export const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/canchas" element={<CanchasPage />} />
+        <Route
+          path="/reservar/:canchaId"
+          element={
+            <ProtectedRoute allowedRoles={["cliente", "admin", "super_admin"]}>
+              <ReservarCanchaPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/mis-reservas"
@@ -50,4 +59,3 @@ export const App = () => {
     </Routes>
   );
 };
-
