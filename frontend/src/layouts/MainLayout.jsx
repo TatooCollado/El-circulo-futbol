@@ -19,7 +19,7 @@ export const MainLayout = () => {
 
             {isAuthenticated ? (
               <>
-                {(user?.rol === "cliente" || user?.rol === "admin") && (
+                {user?.rol === "cliente" && (
                   <Link to="/mis-reservas" className="font-medium text-slate-700 hover:text-slate-950">
                     Mis reservas
                   </Link>

@@ -22,7 +22,7 @@ export const App = () => {
         <Route
           path="/reservar/:canchaId"
           element={
-            <ProtectedRoute allowedRoles={["cliente", "admin", "super_admin"]}>
+            <ProtectedRoute allowedRoles={["cliente"]}>
               <ReservarCanchaPage />
             </ProtectedRoute>
           }
@@ -31,7 +31,7 @@ export const App = () => {
         <Route
           path="/mis-reservas"
           element={
-            <ProtectedRoute allowedRoles={["cliente", "admin"]}>
+            <ProtectedRoute allowedRoles={["cliente"]}>
               <MisReservasPage />
             </ProtectedRoute>
           }
