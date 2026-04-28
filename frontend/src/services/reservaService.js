@@ -9,6 +9,20 @@ export const reservaService = {
   async getMisReservas() {
     const response = await api.get("/reservas/mis-reservas");
     return response.data;
+  },
+
+  async getReservas() {
+    const response = await api.get("/reservas");
+    return response.data;
+  },
+
+  async confirmReserva(id) {
+    const response = await api.put(`/reservas/${id}/confirmar`);
+    return response.data;
+  },
+
+  async cancelReserva(id) {
+    const response = await api.put(`/reservas/${id}/cancelar`);
+    return response.data;
   }
 };
-
