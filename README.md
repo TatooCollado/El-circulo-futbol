@@ -63,6 +63,18 @@ El sistema incluye endpoints de pago simulado para poder defender el flujo aunqu
 Cuando el pago se aprueba, la reserva pasa a `confirmada`.
 Cuando el pago se rechaza, la reserva pasa a `rechazada`.
 
+## Reportes
+
+El rol `super_admin` puede acceder a reportes generales con:
+
+- Usuarios activos.
+- Canchas disponibles.
+- Reservas por estado.
+- Pagos por estado.
+- Ingresos aprobados.
+- Canchas mas reservadas.
+- Proximas reservas activas.
+
 ## Scripts previstos
 
 Backend:

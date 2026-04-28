@@ -1,0 +1,23 @@
+meta {
+  name: 01 Reporte general
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/reportes/general
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.resumen.totalUsuarios: isDefined
+  res.body.reservasPorEstado: isDefined
+  res.body.pagosPorEstado: isDefined
+}
+

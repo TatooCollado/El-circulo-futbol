@@ -8,6 +8,7 @@ import { ReservarCanchaPage } from "./pages/ReservarCanchaPage.jsx";
 import { MisReservasPage } from "./pages/MisReservasPage.jsx";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage.jsx";
 import { SuperAdminUsersPage } from "./pages/SuperAdminUsersPage.jsx";
+import { SuperAdminReportsPage } from "./pages/SuperAdminReportsPage.jsx";
 import { ProtectedRoute } from "./routes/ProtectedRoute.jsx";
 
 export const App = () => {
@@ -50,6 +51,15 @@ export const App = () => {
           element={
             <ProtectedRoute allowedRoles={["super_admin"]}>
               <SuperAdminUsersPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/super-admin/reportes"
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+              <SuperAdminReportsPage />
             </ProtectedRoute>
           }
         />

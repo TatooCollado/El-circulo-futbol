@@ -28,9 +28,14 @@ export const MainLayout = () => {
                   </Link>
                 )}
                 {user?.rol === "super_admin" && (
-                  <Link to="/super-admin/usuarios" className="font-medium text-slate-700 hover:text-slate-950">
-                    Usuarios
-                  </Link>
+                  <>
+                    <Link to="/super-admin/usuarios" className="font-medium text-slate-700 hover:text-slate-950">
+                      Usuarios
+                    </Link>
+                    <Link to="/super-admin/reportes" className="font-medium text-slate-700 hover:text-slate-950">
+                      Reportes
+                    </Link>
+                  </>
                 )}
                 <button
                   className="rounded-md bg-slate-950 px-3 py-2 text-white hover:bg-slate-800"
@@ -60,4 +65,3 @@ export const MainLayout = () => {
     </div>
   );
 };
-

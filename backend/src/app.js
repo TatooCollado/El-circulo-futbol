@@ -6,6 +6,7 @@ import { canchaRoutes } from "./routes/cancha.routes.js";
 import { reservaRoutes } from "./routes/reserva.routes.js";
 import { userRoutes } from "./routes/user.routes.js";
 import { pagoRoutes } from "./routes/pago.routes.js";
+import { reportRoutes } from "./routes/report.routes.js";
 
 export const app = express();
 
@@ -21,6 +22,7 @@ app.use("/api/canchas", canchaRoutes);
 app.use("/api/reservas", reservaRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/pagos", pagoRoutes);
+app.use("/api/reportes", reportRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Recurso no encontrado" });
