@@ -1,9 +1,127 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
+
 export const RegisterPage = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+  const [form, setForm] = useState({
+    nombre: "",
+    apellido: "",
+    email: "",
+    password: ""
+  });
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((currentForm) => ({ ...currentForm, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+
+    if (!form.nombre || !form.apellido || !form.email || !form.password) {
+      setError("Completá todos los campos para crear tu cuenta.");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await register(form);
+      navigate("/canchas", { replace: true });
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <section className="max-w-md">
-      <h1 className="text-3xl font-bold">Crear cuenta</h1>
-      <p className="mt-2 text-slate-600">Formulario pendiente de integrar con la API.</p>
+    <section className="mx-auto max-w-md">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">Crear cuenta</h1>
+        <p className="text-slate-600">Registrate para reservar una cancha.</p>
+      </div>
+
+      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-sm font-medium text-slate-700">Nombre</span>
+            <input
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChange}
+              autoComplete="given-name"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-medium text-slate-700">Apellido</span>
+            <input
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+              name="apellido"
+              value={form.apellido}
+              onChange={handleChange}
+              autoComplete="family-name"
+            />
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="text-sm font-medium text-slate-700">Email</span>
+          <input
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            autoComplete="email"
+          />
+        </label>
+
+        <label className="block">
+          <span className="text-sm font-medium text-slate-700">Contraseña</span>
+          <input
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+          />
+        </label>
+
+        {error && (
+          <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+
+        <button
+          className="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
+        </button>
+      </form>
+
+      <p className="mt-4 text-sm text-slate-600">
+        ¿Ya tenés cuenta?{" "}
+        <Link className="font-semibold text-emerald-700 hover:text-emerald-800" to="/login">
+          Ingresar
+        </Link>
+      </p>
     </section>
   );
 };
-

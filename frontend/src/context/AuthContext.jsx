@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from "react";
+import { authService } from "../services/authService.js";
 
 const AuthContext = createContext(null);
 
@@ -11,11 +12,23 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(storedUser);
 
-  const login = ({ token: nextToken, user: nextUser }) => {
+  const saveSession = ({ token: nextToken, user: nextUser }) => {
     localStorage.setItem("token", nextToken);
     localStorage.setItem("user", JSON.stringify(nextUser));
     setToken(nextToken);
     setUser(nextUser);
+  };
+
+  const login = async (credentials) => {
+    const data = await authService.login(credentials);
+    saveSession(data);
+    return data;
+  };
+
+  const register = async (payload) => {
+    const data = await authService.register(payload);
+    saveSession(data);
+    return data;
   };
 
   const logout = () => {
@@ -32,6 +45,7 @@ export const AuthProvider = ({ children }) => {
       rol: user?.rol,
       isAuthenticated: Boolean(token && user),
       login,
+      register,
       logout
     }),
     [token, user]
@@ -49,4 +63,3 @@ export const useAuth = () => {
 
   return context;
 };
-
