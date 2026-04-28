@@ -7,7 +7,7 @@ if (!env.databaseUrl) {
 
 export const sequelize = new Sequelize(env.databaseUrl, {
   dialect: "postgres",
-  logging: env.nodeEnv === "development" ? console.log : false,
+  logging: env.dbLogging ? console.log : false,
   dialectOptions: {
     ssl: {
       require: true,
@@ -15,4 +15,3 @@ export const sequelize = new Sequelize(env.databaseUrl, {
     }
   }
 });
-

@@ -1,16 +1,13 @@
 import { Router } from "express";
+import { login, me, register } from "../controllers/auth.controller.js";
+import { requireAuth } from "../middlewares/auth.middleware.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+import { loginValidation, registerValidation } from "../validations/auth.validations.js";
 
 export const authRoutes = Router();
 
-authRoutes.post("/register", (req, res) => {
-  res.status(501).json({ message: "Registro pendiente de implementar" });
-});
+authRoutes.post("/register", registerValidation, validateRequest, register);
 
-authRoutes.post("/login", (req, res) => {
-  res.status(501).json({ message: "Login pendiente de implementar" });
-});
+authRoutes.post("/login", loginValidation, validateRequest, login);
 
-authRoutes.get("/me", (req, res) => {
-  res.status(501).json({ message: "Usuario actual pendiente de implementar" });
-});
-
+authRoutes.get("/me", requireAuth, me);
