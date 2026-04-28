@@ -1,20 +1,49 @@
 import { Router } from "express";
+import {
+  createCancha,
+  deleteCancha,
+  getCanchaById,
+  getCanchas,
+  updateCancha
+} from "../controllers/cancha.controller.js";
+import { optionalAuth, requireAuth, requireRole } from "../middlewares/auth.middleware.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+import {
+  canchaIdValidation,
+  canchaValidation,
+  listCanchasValidation
+} from "../validations/cancha.validations.js";
 
 export const canchaRoutes = Router();
 
-canchaRoutes.get("/", (req, res) => {
-  res.status(501).json({ message: "Listado de canchas pendiente de implementar" });
-});
+canchaRoutes.get("/", listCanchasValidation, validateRequest, optionalAuth, getCanchas);
 
-canchaRoutes.post("/", (req, res) => {
-  res.status(501).json({ message: "Alta de cancha pendiente de implementar" });
-});
+canchaRoutes.get("/:id", canchaIdValidation, validateRequest, optionalAuth, getCanchaById);
 
-canchaRoutes.put("/:id", (req, res) => {
-  res.status(501).json({ message: "Modificacion de cancha pendiente de implementar" });
-});
+canchaRoutes.post(
+  "/",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  canchaValidation,
+  validateRequest,
+  createCancha
+);
 
-canchaRoutes.delete("/:id", (req, res) => {
-  res.status(501).json({ message: "Baja de cancha pendiente de implementar" });
-});
+canchaRoutes.put(
+  "/:id",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  canchaIdValidation,
+  canchaValidation,
+  validateRequest,
+  updateCancha
+);
 
+canchaRoutes.delete(
+  "/:id",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  canchaIdValidation,
+  validateRequest,
+  deleteCancha
+);

@@ -2,6 +2,32 @@ import { User } from "../models/index.js";
 import { verifyToken } from "../services/auth.service.js";
 import { httpError } from "../utils/httpError.js";
 
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return next();
+    }
+
+    if (!authHeader.startsWith("Bearer ")) {
+      throw httpError(401, "Token invalido");
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const payload = verifyToken(token);
+    const user = await User.findByPk(payload.id);
+
+    if (user?.activo) {
+      req.user = user;
+    }
+
+    return next();
+  } catch (error) {
+    return next(httpError(401, "Token invalido o vencido"));
+  }
+};
+
 export const requireAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -38,4 +64,3 @@ export const requireRole = (...allowedRoles) => {
     return next();
   };
 };
-
