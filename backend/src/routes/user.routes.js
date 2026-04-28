@@ -1,20 +1,30 @@
 import { Router } from "express";
+import {
+  createUser,
+  deleteUser,
+  getUserById,
+  getUsers,
+  updateUser
+} from "../controllers/user.controller.js";
+import { requireAuth, requireRole } from "../middlewares/auth.middleware.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+import {
+  createUserValidation,
+  listUsersValidation,
+  updateUserValidation,
+  userIdValidation
+} from "../validations/user.validations.js";
 
 export const userRoutes = Router();
 
-userRoutes.get("/", (req, res) => {
-  res.status(501).json({ message: "Listado de usuarios pendiente de implementar" });
-});
+userRoutes.use(requireAuth, requireRole("super_admin"));
 
-userRoutes.post("/", (req, res) => {
-  res.status(501).json({ message: "Alta de usuario pendiente de implementar" });
-});
+userRoutes.get("/", listUsersValidation, validateRequest, getUsers);
 
-userRoutes.put("/:id", (req, res) => {
-  res.status(501).json({ message: "Modificacion de usuario pendiente de implementar" });
-});
+userRoutes.get("/:id", userIdValidation, validateRequest, getUserById);
 
-userRoutes.delete("/:id", (req, res) => {
-  res.status(501).json({ message: "Baja de usuario pendiente de implementar" });
-});
+userRoutes.post("/", createUserValidation, validateRequest, createUser);
 
+userRoutes.put("/:id", userIdValidation, updateUserValidation, validateRequest, updateUser);
+
+userRoutes.delete("/:id", userIdValidation, validateRequest, deleteUser);
