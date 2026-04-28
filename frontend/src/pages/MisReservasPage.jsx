@@ -1,4 +1,4 @@
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { reservaService } from "../services/reservaService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
@@ -9,6 +9,14 @@ const estadoLabels = {
   cancelada: "Cancelada",
   vencida: "Vencida",
   rechazada: "Rechazada"
+};
+
+const estadoStyles = {
+  pendiente_pago: "bg-amber-50 text-amber-700",
+  confirmada: "bg-emerald-50 text-emerald-700",
+  cancelada: "bg-red-50 text-red-700",
+  vencida: "bg-slate-100 text-slate-700",
+  rechazada: "bg-red-50 text-red-700"
 };
 
 const momentoLabels = {
@@ -25,16 +33,24 @@ const formatPrice = (price) => {
   });
 };
 
+const canCancelReserva = (estado) => ["pendiente_pago", "confirmada"].includes(estado);
+
 export const MisReservasPage = () => {
   const [reservas, setReservas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const loadReservas = async () => {
+    const data = await reservaService.getMisReservas();
+    setReservas(data.reservas);
+  };
 
   useEffect(() => {
-    const loadReservas = async () => {
+    const load = async () => {
       try {
-        const data = await reservaService.getMisReservas();
-        setReservas(data.reservas);
+        await loadReservas();
       } catch (loadError) {
         setError(getApiErrorMessage(loadError));
       } finally {
@@ -42,8 +58,24 @@ export const MisReservasPage = () => {
       }
     };
 
-    loadReservas();
+    load();
   }, []);
+
+  const handleCancelReserva = async (reservaId) => {
+    setError("");
+    setSuccess("");
+
+    try {
+      setCancellingId(reservaId);
+      await reservaService.cancelReserva(reservaId);
+      setSuccess("Reserva cancelada correctamente.");
+      await loadReservas();
+    } catch (cancelError) {
+      setError(getApiErrorMessage(cancelError));
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -58,9 +90,15 @@ export const MisReservasPage = () => {
         </div>
       )}
 
-      {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
+      {(error || success) && (
+        <div
+          className={`rounded-md border p-4 text-sm ${
+            error
+              ? "border-red-200 bg-red-50 text-red-700"
+              : "border-emerald-200 bg-emerald-50 text-emerald-700"
+          }`}
+        >
+          {error || success}
         </div>
       )}
 
@@ -91,9 +129,22 @@ export const MisReservasPage = () => {
                 <span className="rounded-md bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-700">
                   {formatPrice(reserva.precioFinal)}
                 </span>
-                <span className="rounded-md bg-emerald-50 px-2 py-1 text-sm font-semibold text-emerald-700">
+                <span
+                  className={`rounded-md px-2 py-1 text-sm font-semibold ${
+                    estadoStyles[reserva.estado] || "bg-slate-100 text-slate-700"
+                  }`}
+                >
                   {estadoLabels[reserva.estado] || reserva.estado}
                 </span>
+                <button
+                  className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="button"
+                  onClick={() => handleCancelReserva(reserva.id)}
+                  disabled={!canCancelReserva(reserva.estado) || cancellingId === reserva.id}
+                >
+                  <X className="h-4 w-4" />
+                  {cancellingId === reserva.id ? "Cancelando..." : "Cancelar"}
+                </button>
               </div>
             </div>
           </article>
@@ -102,3 +153,4 @@ export const MisReservasPage = () => {
     </section>
   );
 };
+
