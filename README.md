@@ -70,3 +70,23 @@ npm install
 npm run dev
 ```
 
+## Bruno
+
+La carpeta `bruno/` contiene la coleccion de requests para probar la API.
+
+Pasos recomendados:
+
+1. Abrir Bruno.
+2. Seleccionar `Open Collection`.
+3. Elegir la carpeta `bruno/`.
+4. Seleccionar el environment `Local`.
+5. Ejecutar primero un login de `auth/` para guardar el token.
+6. Ejecutar requests protegidas de canchas, reservas o usuarios.
+
+Usuarios demo:
+
+```txt
+superadmin@demo.com / Demo1234
+admin@demo.com / Demo1234
+cliente@demo.com / Demo1234
+```

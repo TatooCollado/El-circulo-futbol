@@ -1,0 +1,21 @@
+meta {
+  name: 01 Listar usuarios
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/users?incluirInactivos=true
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.users: isArray
+}
+

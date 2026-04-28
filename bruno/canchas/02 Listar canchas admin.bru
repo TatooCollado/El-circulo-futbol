@@ -1,0 +1,21 @@
+meta {
+  name: 02 Listar canchas admin
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/canchas?incluirNoDisponibles=true
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.canchas: isArray
+}
+

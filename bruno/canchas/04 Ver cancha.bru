@@ -1,0 +1,17 @@
+meta {
+  name: 04 Ver cancha
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/canchas/{{canchaId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.cancha.id: isDefined
+}
+

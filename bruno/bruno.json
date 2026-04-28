@@ -1,0 +1,2 @@
+{ "version": "1", "name": "El Circulo Futbol", "type": "collection", "ignore": [ "node_modules", ".git" ] }
+

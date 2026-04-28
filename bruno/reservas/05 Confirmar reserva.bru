@@ -1,0 +1,21 @@
+meta {
+  name: 05 Confirmar reserva
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/reservas/{{reservaId}}/confirmar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.reserva.estado: eq confirmada
+}
+

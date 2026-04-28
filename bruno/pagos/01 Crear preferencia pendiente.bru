@@ -1,0 +1,29 @@
+meta {
+  name: 01 Crear preferencia pendiente
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/pagos/crear-preferencia
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "reservaId": "{{reservaId}}"
+  }
+}
+
+docs {
+  Endpoint pendiente para la etapa de Mercado Pago.
+}

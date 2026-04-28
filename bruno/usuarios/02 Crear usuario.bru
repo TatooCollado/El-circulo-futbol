@@ -1,0 +1,39 @@
+meta {
+  name: 02 Crear usuario
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Usuario",
+    "apellido": "Bruno",
+    "email": "usuario.bruno@demo.com",
+    "password": "Demo1234",
+    "rol": "cliente",
+    "activo": true
+  }
+}
+
+vars:post-response {
+  userId: res.body.user.id
+}
+
+assert {
+  res.status: eq 201
+  res.body.user.id: isDefined
+}

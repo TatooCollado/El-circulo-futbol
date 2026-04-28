@@ -1,0 +1,39 @@
+meta {
+  name: 03 Crear cancha
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/canchas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Cancha Bruno",
+    "tipo": "futbol_5",
+    "descripcion": "Cancha creada desde Bruno",
+    "precio": 18000,
+    "disponible": true
+  }
+}
+
+vars:post-response {
+  canchaId: res.body.cancha.id
+}
+
+assert {
+  res.status: eq 201
+  res.body.cancha.id: isDefined
+}
+

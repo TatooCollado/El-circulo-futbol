@@ -1,0 +1,35 @@
+meta {
+  name: 05 Editar cancha
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/canchas/{{canchaId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Cancha Bruno Editada",
+    "tipo": "futbol_7",
+    "descripcion": "Cancha editada desde Bruno",
+    "precio": 22000,
+    "disponible": true
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.cancha.tipo: eq futbol_7
+}
+

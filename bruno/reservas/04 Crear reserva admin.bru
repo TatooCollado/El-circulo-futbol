@@ -1,0 +1,39 @@
+meta {
+  name: 04 Crear reserva admin
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/reservas/admin
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "usuarioId": "{{usuarioIdCliente}}",
+    "canchaId": "{{canchaId}}",
+    "fecha": "{{fechaReserva}}",
+    "momento": "tarde",
+    "estado": "confirmada"
+  }
+}
+
+vars:post-response {
+  reservaAdminId: res.body.reserva.id
+}
+
+assert {
+  res.status: eq 201
+  res.body.reserva.estado: eq confirmada
+  res.body.reserva.Pago.estado: eq aprobado
+}
