@@ -9,14 +9,13 @@ export const Cancha = defineCanchaModel(sequelize);
 export const Reserva = defineReservaModel(sequelize);
 export const Pago = definePagoModel(sequelize);
 
-User.hasMany(Reserva, { foreignKey: "usuarioId" });
-Reserva.belongsTo(User, { foreignKey: "usuarioId" });
+User.hasMany(Reserva, { foreignKey: { name: "usuarioId", allowNull: false } });
+Reserva.belongsTo(User, { foreignKey: { name: "usuarioId", allowNull: false } });
 
-Cancha.hasMany(Reserva, { foreignKey: "canchaId" });
-Reserva.belongsTo(Cancha, { foreignKey: "canchaId" });
+Cancha.hasMany(Reserva, { foreignKey: { name: "canchaId", allowNull: false } });
+Reserva.belongsTo(Cancha, { foreignKey: { name: "canchaId", allowNull: false } });
 
-Reserva.hasOne(Pago, { foreignKey: "reservaId" });
-Pago.belongsTo(Reserva, { foreignKey: "reservaId" });
+Reserva.hasOne(Pago, { foreignKey: { name: "reservaId", allowNull: false } });
+Pago.belongsTo(Reserva, { foreignKey: { name: "reservaId", allowNull: false } });
 
 export { sequelize };
-

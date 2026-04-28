@@ -35,6 +35,14 @@ export const defineReservaModel = (sequelize) => {
       venceEn: {
         type: DataTypes.DATE,
         allowNull: true
+      },
+      usuarioId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      canchaId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
       }
     },
     {
@@ -44,4 +52,3 @@ export const defineReservaModel = (sequelize) => {
 
   return Reserva;
 };
-

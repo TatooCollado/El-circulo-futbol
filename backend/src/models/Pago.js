@@ -29,6 +29,10 @@ export const definePagoModel = (sequelize) => {
       metodo: {
         type: DataTypes.STRING,
         allowNull: true
+      },
+      reservaId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
       }
     },
     {
@@ -38,4 +42,3 @@ export const definePagoModel = (sequelize) => {
 
   return Pago;
 };
-
