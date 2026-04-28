@@ -25,5 +25,10 @@ body:json {
 }
 
 docs {
-  Endpoint pendiente para la etapa de Mercado Pago.
+  Crea una preferencia simulada para una reserva pendiente.
+}
+
+assert {
+  res.status: eq 200
+  res.body.pago.id: isDefined
 }

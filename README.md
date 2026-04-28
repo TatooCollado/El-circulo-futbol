@@ -52,6 +52,17 @@ el-circulo-futbol/
 7. Si el pago se rechaza, la reserva pasa a rechazada.
 8. Si vence la tolerancia, la reserva pasa a vencida.
 
+## Pagos demo
+
+El sistema incluye endpoints de pago simulado para poder defender el flujo aunque no se use Mercado Pago en vivo:
+
+- Crear preferencia simulada.
+- Simular pago aprobado.
+- Simular pago rechazado.
+
+Cuando el pago se aprueba, la reserva pasa a `confirmada`.
+Cuando el pago se rechaza, la reserva pasa a `rechazada`.
+
 ## Scripts previstos
 
 Backend:

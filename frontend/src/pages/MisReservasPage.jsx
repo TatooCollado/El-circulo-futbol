@@ -1,5 +1,6 @@
-import { CalendarDays, X } from "lucide-react";
+import { Ban, CalendarDays, CreditCard, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { pagoService } from "../services/pagoService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
@@ -25,6 +26,20 @@ const momentoLabels = {
   noche: "Noche"
 };
 
+const pagoLabels = {
+  pendiente: "Pago pendiente",
+  aprobado: "Pago aprobado",
+  rechazado: "Pago rechazado",
+  cancelado: "Pago cancelado"
+};
+
+const pagoStyles = {
+  pendiente: "bg-amber-50 text-amber-700",
+  aprobado: "bg-emerald-50 text-emerald-700",
+  rechazado: "bg-red-50 text-red-700",
+  cancelado: "bg-slate-100 text-slate-700"
+};
+
 const formatPrice = (price) => {
   return Number(price).toLocaleString("es-AR", {
     style: "currency",
@@ -39,6 +54,7 @@ export const MisReservasPage = () => {
   const [reservas, setReservas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
+  const [processingPagoId, setProcessingPagoId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -74,6 +90,26 @@ export const MisReservasPage = () => {
       setError(getApiErrorMessage(cancelError));
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const handleSimulatePago = async (pagoId, resultado) => {
+    setError("");
+    setSuccess("");
+
+    try {
+      setProcessingPagoId(pagoId);
+      await pagoService.simulatePago(pagoId, resultado);
+      setSuccess(
+        resultado === "aprobado"
+          ? "Pago aprobado. La reserva quedó confirmada."
+          : "Pago rechazado. La reserva quedó rechazada."
+      );
+      await loadReservas();
+    } catch (paymentError) {
+      setError(getApiErrorMessage(paymentError));
+    } finally {
+      setProcessingPagoId(null);
     }
   };
 
@@ -136,6 +172,37 @@ export const MisReservasPage = () => {
                 >
                   {estadoLabels[reserva.estado] || reserva.estado}
                 </span>
+                {reserva.Pago && (
+                  <span
+                    className={`rounded-md px-2 py-1 text-sm font-semibold ${
+                      pagoStyles[reserva.Pago.estado] || "bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {pagoLabels[reserva.Pago.estado] || reserva.Pago.estado}
+                  </span>
+                )}
+                {reserva.estado === "pendiente_pago" && reserva.Pago?.estado === "pendiente" && (
+                  <>
+                    <button
+                      className="inline-flex items-center gap-2 rounded-md border border-emerald-200 px-3 py-1.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      type="button"
+                      onClick={() => handleSimulatePago(reserva.Pago.id, "aprobado")}
+                      disabled={processingPagoId === reserva.Pago.id}
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      {processingPagoId === reserva.Pago.id ? "Procesando..." : "Pagar demo"}
+                    </button>
+                    <button
+                      className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      type="button"
+                      onClick={() => handleSimulatePago(reserva.Pago.id, "rechazado")}
+                      disabled={processingPagoId === reserva.Pago.id}
+                    >
+                      <Ban className="h-4 w-4" />
+                      Rechazar demo
+                    </button>
+                  </>
+                )}
                 <button
                   className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                   type="button"
@@ -153,4 +220,3 @@ export const MisReservasPage = () => {
     </section>
   );
 };
-

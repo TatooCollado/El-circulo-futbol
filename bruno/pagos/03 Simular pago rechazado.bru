@@ -1,0 +1,32 @@
+meta {
+  name: 03 Simular pago rechazado
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/pagos/{{pagoId}}/simular
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "resultado": "rechazado"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.pago.estado: eq rechazado
+  res.body.pago.Reserva.estado: eq rechazada
+}
+

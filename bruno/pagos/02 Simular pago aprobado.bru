@@ -1,0 +1,32 @@
+meta {
+  name: 02 Simular pago aprobado
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/pagos/{{pagoId}}/simular
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "resultado": "aprobado"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.pago.estado: eq aprobado
+  res.body.pago.Reserva.estado: eq confirmada
+}
+

@@ -1,16 +1,37 @@
 import { Router } from "express";
+import {
+  createPreferenciaPago,
+  getPagoById,
+  receiveWebhook,
+  simulatePago
+} from "../controllers/pago.controller.js";
+import { requireAuth } from "../middlewares/auth.middleware.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+import {
+  createPreferenciaValidation,
+  pagoIdValidation,
+  simulatePagoValidation
+} from "../validations/pago.validations.js";
 
 export const pagoRoutes = Router();
 
-pagoRoutes.post("/crear-preferencia", (req, res) => {
-  res.status(501).json({ message: "Preferencia de pago pendiente de implementar" });
-});
+pagoRoutes.post(
+  "/crear-preferencia",
+  requireAuth,
+  createPreferenciaValidation,
+  validateRequest,
+  createPreferenciaPago
+);
 
-pagoRoutes.post("/webhook", (req, res) => {
-  res.status(501).json({ message: "Webhook de pago pendiente de implementar" });
-});
+pagoRoutes.post("/webhook", receiveWebhook);
 
-pagoRoutes.post("/:id/simular", (req, res) => {
-  res.status(501).json({ message: "Simulacion de pago pendiente de implementar" });
-});
+pagoRoutes.get("/:id", requireAuth, pagoIdValidation, validateRequest, getPagoById);
 
+pagoRoutes.post(
+  "/:id/simular",
+  requireAuth,
+  pagoIdValidation,
+  simulatePagoValidation,
+  validateRequest,
+  simulatePago
+);
