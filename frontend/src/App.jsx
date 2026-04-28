@@ -31,7 +31,7 @@ export const App = () => {
         <Route
           path="/mis-reservas"
           element={
-            <ProtectedRoute allowedRoles={["cliente", "admin", "super_admin"]}>
+            <ProtectedRoute allowedRoles={["cliente", "admin"]}>
               <MisReservasPage />
             </ProtectedRoute>
           }
