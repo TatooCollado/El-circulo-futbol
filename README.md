@@ -13,7 +13,7 @@ El Circulo Futbol es una aplicacion web SPA para administrar un complejo de canc
 
 Momentos disponibles:
 
-- manana
+- mañana
 - tarde
 - noche
 
