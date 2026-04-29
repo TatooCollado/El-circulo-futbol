@@ -1,4 +1,5 @@
-import { Cancha } from "../models/index.js";
+import { Op } from "sequelize";
+import { Cancha, Reserva } from "../models/index.js";
 import { httpError } from "../utils/httpError.js";
 
 const normalizeCanchaPayload = (body) => ({
@@ -89,6 +90,19 @@ export const deleteCancha = async (req, res, next) => {
 
     if (!cancha) {
       throw httpError(404, "Cancha no encontrada");
+    }
+
+    const activeReserva = await Reserva.findOne({
+      where: {
+        canchaId: cancha.id,
+        estado: {
+          [Op.in]: ["pendiente_pago", "confirmada"]
+        }
+      }
+    });
+
+    if (activeReserva) {
+      throw httpError(409, "No se puede dar de baja una cancha con reservas activas");
     }
 
     await cancha.update({ disponible: false });

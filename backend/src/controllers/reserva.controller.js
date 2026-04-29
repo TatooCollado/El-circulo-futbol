@@ -57,6 +57,26 @@ export const getMisReservas = async (req, res, next) => {
   }
 };
 
+export const getClientesParaReserva = async (req, res, next) => {
+  try {
+    const clientes = await User.findAll({
+      where: {
+        rol: "cliente",
+        activo: true
+      },
+      attributes: ["id", "nombre", "apellido", "email"],
+      order: [
+        ["apellido", "ASC"],
+        ["nombre", "ASC"]
+      ]
+    });
+
+    return res.json({ clientes });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const createReserva = async (req, res, next) => {
   try {
     const reserva = await createReservaWithRules({
@@ -82,7 +102,7 @@ export const createReservaAdmin = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.body.usuarioId);
 
-    if (!user || !user.activo) {
+    if (!user || !user.activo || user.rol !== "cliente") {
       throw httpError(404, "Usuario no encontrado");
     }
 
@@ -150,21 +170,48 @@ export const confirmReserva = async (req, res, next) => {
 
     if (reserva.venceEn && reserva.venceEn < new Date()) {
       await reserva.update({ estado: "vencida", venceEn: null });
+      if (reserva.Pago && reserva.Pago.estado === "pendiente") {
+        await reserva.Pago.update({ estado: "cancelado" });
+      }
       throw httpError(409, "La reserva ya vencio");
     }
 
-    await Reserva.update(
-      { estado: "vencida" },
-      {
-        where: {
-          id: { [Op.ne]: reserva.id },
-          canchaId: reserva.canchaId,
-          fecha: reserva.fecha,
-          momento: reserva.momento,
-          estado: "pendiente_pago"
-        }
+    const reservasPendientesMismoTurno = await Reserva.findAll({
+      attributes: ["id"],
+      where: {
+        id: { [Op.ne]: reserva.id },
+        canchaId: reserva.canchaId,
+        fecha: reserva.fecha,
+        momento: reserva.momento,
+        estado: "pendiente_pago"
       }
-    );
+    });
+    const reservasPendientesIds = reservasPendientesMismoTurno.map((item) => item.id);
+
+    if (reservasPendientesIds.length > 0) {
+      await Reserva.update(
+        { estado: "vencida" },
+        {
+          where: {
+            id: {
+              [Op.in]: reservasPendientesIds
+            }
+          }
+        }
+      );
+
+      await Pago.update(
+        { estado: "cancelado" },
+        {
+          where: {
+            reservaId: {
+              [Op.in]: reservasPendientesIds
+            },
+            estado: "pendiente"
+          }
+        }
+      );
+    }
 
     await reserva.update({ estado: "confirmada", venceEn: null });
 

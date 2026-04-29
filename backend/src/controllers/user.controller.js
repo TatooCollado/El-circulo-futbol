@@ -78,6 +78,10 @@ export const updateUser = async (req, res, next) => {
       throw httpError(409, "Ya existe otro usuario con ese email");
     }
 
+    if (user.id === req.user.id && (rol !== user.rol || activo === false)) {
+      throw httpError(409, "No podes cambiar tu propio rol ni desactivar tu usuario");
+    }
+
     await user.update({
       nombre,
       apellido,
@@ -118,4 +122,3 @@ export const deleteUser = async (req, res, next) => {
     return next(error);
   }
 };
-

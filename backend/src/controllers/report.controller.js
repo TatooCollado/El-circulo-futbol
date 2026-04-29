@@ -1,7 +1,17 @@
-import { fn, literal } from "sequelize";
+import { Op, fn, literal } from "sequelize";
 import { Cancha, Pago, Reserva, User } from "../models/index.js";
+import { expirePendingReservations } from "../services/reserva.service.js";
 
 const toNumber = (value) => Number(value || 0);
+
+const getLocalDateString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
 
 const normalizeGroupedCount = (rows, key) => {
   return rows.reduce((acc, row) => {
@@ -12,6 +22,10 @@ const normalizeGroupedCount = (rows, key) => {
 
 export const getGeneralReport = async (req, res, next) => {
   try {
+    await expirePendingReservations();
+
+    const today = getLocalDateString();
+
     const [
       totalUsuarios,
       usuariosActivos,
@@ -60,7 +74,10 @@ export const getGeneralReport = async (req, res, next) => {
           }
         ],
         where: {
-          estado: ["pendiente_pago", "confirmada"]
+          estado: ["pendiente_pago", "confirmada"],
+          fecha: {
+            [Op.gte]: today
+          }
         },
         order: [
           ["fecha", "ASC"],
@@ -92,4 +109,3 @@ export const getGeneralReport = async (req, res, next) => {
     return next(error);
   }
 };
-

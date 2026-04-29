@@ -24,6 +24,7 @@ export const SuperAdminUsersPage = () => {
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState(emptyUserForm);
   const [editingUserId, setEditingUserId] = useState(null);
+  const [filters, setFilters] = useState({ rol: "", estado: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +35,20 @@ export const SuperAdminUsersPage = () => {
     () => users.filter((user) => ["admin", "super_admin"].includes(user.rol) && user.activo),
     [users]
   );
+  const isEditingSelf = editingUserId === currentUser?.id;
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const matchesRol = filters.rol ? user.rol === filters.rol : true;
+      const matchesEstado =
+        filters.estado === "activo"
+          ? user.activo
+          : filters.estado === "inactivo"
+            ? !user.activo
+            : true;
+
+      return matchesRol && matchesEstado;
+    });
+  }, [filters, users]);
 
   const loadUsers = async () => {
     const data = await userService.getUsers({ incluirInactivos: true });
@@ -65,6 +80,11 @@ export const SuperAdminUsersPage = () => {
       ...currentForm,
       [name]: type === "checkbox" ? checked : value
     }));
+  };
+
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilters((currentFilters) => ({ ...currentFilters, [name]: value }));
   };
 
   const handleEdit = (user) => {
@@ -222,6 +242,7 @@ export const SuperAdminUsersPage = () => {
                   name="rol"
                   value={form.rol}
                   onChange={handleChange}
+                  disabled={isEditingSelf}
                 >
                   <option value="cliente">Cliente</option>
                   <option value="admin">Admin</option>
@@ -250,9 +271,15 @@ export const SuperAdminUsersPage = () => {
                 name="activo"
                 type="checkbox"
                 onChange={handleChange}
+                disabled={isEditingSelf}
               />
               Activo
             </label>
+            {isEditingSelf && (
+              <p className="text-sm text-slate-500">
+                Tu propio rol y estado no se pueden modificar desde esta pantalla.
+              </p>
+            )}
 
             <div className="flex gap-2">
               <button
@@ -278,8 +305,40 @@ export const SuperAdminUsersPage = () => {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold">Listado</h2>
-          {users.map((user) => (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-xl font-bold">Listado</h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <select
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                name="rol"
+                value={filters.rol}
+                onChange={handleFilterChange}
+              >
+                <option value="">Todos los roles</option>
+                <option value="cliente">Cliente</option>
+                <option value="admin">Admin</option>
+                <option value="super_admin">Super admin</option>
+              </select>
+              <select
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                name="estado"
+                value={filters.estado}
+                onChange={handleFilterChange}
+              >
+                <option value="">Todos los estados</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+              </select>
+            </div>
+          </div>
+
+          {filteredUsers.length === 0 && (
+            <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
+              No hay usuarios para los filtros seleccionados.
+            </div>
+          )}
+
+          {filteredUsers.map((user) => (
             <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={user.id}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -328,4 +387,3 @@ export const SuperAdminUsersPage = () => {
     </section>
   );
 };
-

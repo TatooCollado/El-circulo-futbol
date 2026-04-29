@@ -16,10 +16,8 @@ const pagoInclude = [
   }
 ];
 
-const canManagePagos = (user) => ["admin", "super_admin"].includes(user?.rol);
-
 const assertPagoAccess = (req, pago) => {
-  if (!canManagePagos(req.user) && pago.Reserva?.usuarioId !== req.user.id) {
+  if (pago.Reserva?.usuarioId !== req.user.id) {
     throw httpError(403, "No tenes permisos para operar este pago");
   }
 };
@@ -62,7 +60,7 @@ export const createPreferenciaPago = async (req, res, next) => {
       throw httpError(404, "Reserva o pago no encontrado");
     }
 
-    if (!canManagePagos(req.user) && reserva.usuarioId !== req.user.id) {
+    if (reserva.usuarioId !== req.user.id) {
       throw httpError(403, "No tenes permisos para operar esta reserva");
     }
 
@@ -142,4 +140,3 @@ export const simulatePago = async (req, res, next) => {
 export const receiveWebhook = (req, res) => {
   return res.json({ message: "Webhook recibido en modo demo" });
 };
-

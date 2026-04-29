@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
+import { getLocalDateString } from "../utils/date.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
 const momentos = [
@@ -10,8 +11,6 @@ const momentos = [
   { value: "tarde", label: "Tarde" },
   { value: "noche", label: "Noche" }
 ];
-
-const getToday = () => new Date().toISOString().slice(0, 10);
 
 const formatPrice = (price) => {
   return Number(price).toLocaleString("es-AR", {
@@ -24,7 +23,7 @@ const formatPrice = (price) => {
 export const ReservarCanchaPage = () => {
   const { canchaId } = useParams();
   const navigate = useNavigate();
-  const today = useMemo(getToday, []);
+  const today = useMemo(() => getLocalDateString(), []);
   const [cancha, setCancha] = useState(null);
   const [form, setForm] = useState({
     fecha: today,
@@ -186,4 +185,3 @@ export const ReservarCanchaPage = () => {
     </section>
   );
 };
-

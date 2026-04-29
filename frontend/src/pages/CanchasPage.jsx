@@ -1,6 +1,7 @@
 import { CalendarDays, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 import { canchaService } from "../services/canchaService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
@@ -19,6 +20,7 @@ const formatPrice = (price) => {
 };
 
 export const CanchasPage = () => {
+  const { isAuthenticated, rol } = useAuth();
   const [canchas, setCanchas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -95,13 +97,15 @@ export const CanchasPage = () => {
                   <p className="text-xs uppercase text-slate-500">Precio</p>
                   <p className="text-lg font-bold text-slate-950">{formatPrice(cancha.precio)}</p>
                 </div>
-                <Link
-                  className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                  to={`/reservar/${cancha.id}`}
-                >
-                  <CalendarDays className="h-4 w-4" />
-                  Reservar
-                </Link>
+                {(!isAuthenticated || rol === "cliente") && (
+                  <Link
+                    className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                    to={`/reservar/${cancha.id}`}
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                    Reservar
+                  </Link>
+                )}
               </div>
             </div>
           </article>

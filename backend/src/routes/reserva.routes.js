@@ -4,6 +4,7 @@ import {
   confirmReserva,
   createReserva,
   createReservaAdmin,
+  getClientesParaReserva,
   getMisReservas,
   getReservas
 } from "../controllers/reserva.controller.js";
@@ -20,6 +21,13 @@ export const reservaRoutes = Router();
 reservaRoutes.get("/", requireAuth, requireRole("admin", "super_admin"), getReservas);
 
 reservaRoutes.get("/mis-reservas", requireAuth, requireRole("cliente"), getMisReservas);
+
+reservaRoutes.get(
+  "/clientes",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  getClientesParaReserva
+);
 
 reservaRoutes.post(
   "/",
