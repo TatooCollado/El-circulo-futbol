@@ -4,6 +4,8 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  EyeOff,
   Pencil,
   Plus,
   Search,
@@ -47,6 +49,8 @@ const estadoLabels = {
   vencida: "Vencida",
   rechazada: "Rechazada"
 };
+
+const activeReservaStates = ["pendiente_pago", "confirmada"];
 
 const momentoLabels = {
   manana: "Mañana",
@@ -146,6 +150,8 @@ export const AdminDashboardPage = () => {
   const [clienteForm, setClienteForm] = useState(emptyClienteForm);
   const [reservaForm, setReservaForm] = useState(createEmptyReservaForm);
   const [filters, setFilters] = useState({ estado: "", canchaId: "", fecha: "", busqueda: "" });
+  const [showCancelledGlobal, setShowCancelledGlobal] = useState(false);
+  const [showCancelledForSelectedDay, setShowCancelledForSelectedDay] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(getLocalDateString().slice(0, 7));
   const [editingCanchaId, setEditingCanchaId] = useState(null);
   const [showClienteForm, setShowClienteForm] = useState(false);
@@ -158,7 +164,7 @@ export const AdminDashboardPage = () => {
   const [success, setSuccess] = useState("");
 
   const activeReservas = useMemo(
-    () => reservas.filter((reserva) => ["pendiente_pago", "confirmada"].includes(reserva.estado)),
+    () => reservas.filter((reserva) => activeReservaStates.includes(reserva.estado)),
     [reservas]
   );
 
@@ -167,7 +173,7 @@ export const AdminDashboardPage = () => {
     [canchas]
   );
 
-  const reservasFiltradasBase = useMemo(() => {
+  const reservasConFiltrosOperativos = useMemo(() => {
     const busqueda = normalizeText(filters.busqueda).trim();
 
     return reservas.filter((reserva) => {
@@ -189,6 +195,30 @@ export const AdminDashboardPage = () => {
       return matchesEstado && matchesCancha && matchesBusqueda;
     });
   }, [filters.busqueda, filters.canchaId, filters.estado, reservas]);
+
+  const cancelledReservasConFiltros = useMemo(
+    () => reservasConFiltrosOperativos.filter((reserva) => reserva.estado === "cancelada"),
+    [reservasConFiltrosOperativos]
+  );
+
+  const selectedDayCancelledCount = useMemo(() => {
+    if (!filters.fecha) {
+      return 0;
+    }
+
+    return cancelledReservasConFiltros.filter((reserva) => reserva.fecha === filters.fecha).length;
+  }, [cancelledReservasConFiltros, filters.fecha]);
+
+  const reservasFiltradasBase = useMemo(() => {
+    return reservasConFiltrosOperativos.filter((reserva) => {
+      const isActiveReserva = activeReservaStates.includes(reserva.estado);
+      const isCancelledReserva = reserva.estado === "cancelada";
+      const shouldShowSelectedDayCancelled =
+        Boolean(filters.fecha) && showCancelledForSelectedDay && reserva.fecha === filters.fecha;
+
+      return isActiveReserva || (isCancelledReserva && (showCancelledGlobal || shouldShowSelectedDayCancelled));
+    });
+  }, [filters.fecha, reservasConFiltrosOperativos, showCancelledForSelectedDay, showCancelledGlobal]);
 
   const filteredReservas = useMemo(() => {
     const reservasPorFecha = filters.fecha
@@ -261,6 +291,11 @@ export const AdminDashboardPage = () => {
     if (name === "fecha" && value) {
       setCalendarMonth(value.slice(0, 7));
     }
+
+    if (name === "fecha") {
+      setShowCancelledGlobal(false);
+      setShowCancelledForSelectedDay(false);
+    }
   };
 
   const resetCanchaForm = () => {
@@ -279,6 +314,20 @@ export const AdminDashboardPage = () => {
 
   const handleClearFilters = () => {
     setFilters({ estado: "", canchaId: "", fecha: "", busqueda: "" });
+    setShowCancelledGlobal(false);
+    setShowCancelledForSelectedDay(false);
+  };
+
+  const handleToggleCancelledGlobal = () => {
+    setShowCancelledGlobal((currentValue) => {
+      const nextValue = !currentValue;
+
+      if (nextValue) {
+        setShowCancelledForSelectedDay(false);
+      }
+
+      return nextValue;
+    });
   };
 
   const handleCalendarMonthChange = (offset) => {
@@ -291,6 +340,8 @@ export const AdminDashboardPage = () => {
       return;
     }
 
+    setShowCancelledGlobal(false);
+    setShowCancelledForSelectedDay(false);
     setFilters((currentFilters) => ({
       ...currentFilters,
       fecha: currentFilters.fecha === date ? "" : date
@@ -845,6 +896,48 @@ export const AdminDashboardPage = () => {
                 value={filters.fecha}
                 onChange={handleFilterChange}
               />
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {!filters.fecha && (
+                <button
+                  className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition ${
+                    showCancelledGlobal
+                      ? "border-slate-400 bg-slate-100 text-slate-800"
+                      : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                  } disabled:opacity-50`}
+                  type="button"
+                  onClick={handleToggleCancelledGlobal}
+                  disabled={cancelledReservasConFiltros.length === 0}
+                >
+                  {showCancelledGlobal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showCancelledGlobal
+                    ? "Ocultar canceladas totales"
+                    : `Mostrar canceladas totales (${cancelledReservasConFiltros.length})`}
+                </button>
+              )}
+
+              {filters.fecha && (
+                <button
+                  className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition ${
+                    showCancelledForSelectedDay
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                      : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  } disabled:opacity-50`}
+                  type="button"
+                  onClick={() => setShowCancelledForSelectedDay((currentValue) => !currentValue)}
+                  disabled={selectedDayCancelledCount === 0}
+                >
+                  {showCancelledForSelectedDay ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showCancelledForSelectedDay
+                    ? "Ocultar canceladas del día"
+                    : `Mostrar canceladas del día (${selectedDayCancelledCount})`}
+                </button>
+              )}
+
+              {!showCancelledGlobal && !showCancelledForSelectedDay && (
+                <span className="text-sm font-medium text-slate-500">Vista operativa: solo reservas activas.</span>
+              )}
             </div>
           </div>
 
