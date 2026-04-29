@@ -13,7 +13,7 @@ import {
   UserPlus,
   X
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
@@ -143,6 +143,7 @@ const buildCalendarDays = (monthValue, reservas) => {
 };
 
 export const AdminDashboardPage = () => {
+  const reservaFormRef = useRef(null);
   const [canchas, setCanchas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [reservas, setReservas] = useState([]);
@@ -388,6 +389,11 @@ export const AdminDashboardPage = () => {
       fecha: reserva.fecha,
       momento: reserva.momento,
       estado: activeReservaStates.includes(reserva.estado) ? reserva.estado : "confirmada"
+    });
+
+    window.requestAnimationFrame(() => {
+      reservaFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      reservaFormRef.current?.focus({ preventScroll: true });
     });
   };
 
@@ -671,7 +677,13 @@ export const AdminDashboardPage = () => {
             </form>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div
+            className={`rounded-lg border bg-white p-4 shadow-sm outline-none transition ${
+              editingReservaId ? "border-emerald-300 ring-2 ring-emerald-100" : "border-slate-200"
+            }`}
+            ref={reservaFormRef}
+            tabIndex={-1}
+          >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-bold">{editingReservaId ? "Editar reserva" : "Reserva manual"}</h2>
