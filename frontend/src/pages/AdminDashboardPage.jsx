@@ -149,6 +149,7 @@ export const AdminDashboardPage = () => {
   const [form, setForm] = useState(emptyCanchaForm);
   const [clienteForm, setClienteForm] = useState(emptyClienteForm);
   const [reservaForm, setReservaForm] = useState(createEmptyReservaForm);
+  const [editingReservaId, setEditingReservaId] = useState(null);
   const [filters, setFilters] = useState({ estado: "", canchaId: "", fecha: "", busqueda: "" });
   const [showCancelledGlobal, setShowCancelledGlobal] = useState(false);
   const [showCancelledForSelectedDay, setShowCancelledForSelectedDay] = useState(false);
@@ -241,6 +242,22 @@ export const AdminDashboardPage = () => {
     [calendarMonth, reservasFiltradasBase]
   );
 
+  const selectedSlotConflict = useMemo(() => {
+    if (!reservaForm.canchaId || !reservaForm.fecha || !reservaForm.momento) {
+      return null;
+    }
+
+    return reservas.find((reserva) => {
+      return (
+        activeReservaStates.includes(reserva.estado) &&
+        reserva.id !== editingReservaId &&
+        String(reserva.canchaId) === String(reservaForm.canchaId) &&
+        reserva.fecha === reservaForm.fecha &&
+        reserva.momento === reservaForm.momento
+      );
+    });
+  }, [editingReservaId, reservaForm.canchaId, reservaForm.fecha, reservaForm.momento, reservas]);
+
   const loadAdminData = async () => {
     const [canchasData, reservasData, clientesData] = await Promise.all([
       canchaService.getCanchasAdmin(),
@@ -310,6 +327,7 @@ export const AdminDashboardPage = () => {
 
   const resetReservaForm = () => {
     setReservaForm(createEmptyReservaForm());
+    setEditingReservaId(null);
   };
 
   const handleClearFilters = () => {
@@ -356,6 +374,20 @@ export const AdminDashboardPage = () => {
       descripcion: cancha.descripcion || "",
       precio: cancha.precio,
       disponible: cancha.disponible
+    });
+  };
+
+  const handleEditReserva = (reserva) => {
+    setError("");
+    setSuccess("");
+    setShowClienteForm(false);
+    setEditingReservaId(reserva.id);
+    setReservaForm({
+      usuarioId: String(reserva.usuarioId),
+      canchaId: String(reserva.canchaId),
+      fecha: reserva.fecha,
+      momento: reserva.momento,
+      estado: activeReservaStates.includes(reserva.estado) ? reserva.estado : "confirmada"
     });
   };
 
@@ -430,14 +462,27 @@ export const AdminDashboardPage = () => {
       return;
     }
 
+    if (selectedSlotConflict) {
+      setError("Ese turno ya está ocupado por otra reserva activa.");
+      return;
+    }
+
     try {
       setIsSubmittingReserva(true);
-      await reservaService.createReservaAdmin({
+      const payload = {
         ...reservaForm,
         usuarioId: Number(reservaForm.usuarioId),
         canchaId: Number(reservaForm.canchaId)
-      });
-      setSuccess("Reserva manual creada correctamente.");
+      };
+
+      if (editingReservaId) {
+        await reservaService.updateReservaAdmin(editingReservaId, payload);
+        setSuccess("Reserva actualizada correctamente.");
+      } else {
+        await reservaService.createReservaAdmin(payload);
+        setSuccess("Reserva manual creada correctamente.");
+      }
+
       resetReservaForm();
       await loadAdminData();
     } catch (submitError) {
@@ -484,6 +529,9 @@ export const AdminDashboardPage = () => {
       setUpdatingReservaId(reservaId);
       await reservaService.cancelReserva(reservaId);
       setSuccess("Reserva cancelada correctamente.");
+      if (editingReservaId === reservaId) {
+        resetReservaForm();
+      }
       await loadAdminData();
     } catch (cancelError) {
       setError(getApiErrorMessage(cancelError));
@@ -626,8 +674,12 @@ export const AdminDashboardPage = () => {
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-xl font-bold">Reserva manual</h2>
-                <p className="mt-1 text-sm text-slate-500">Creá un cliente si todavía no existe y dejalo seleccionado.</p>
+                <h2 className="text-xl font-bold">{editingReservaId ? "Editar reserva" : "Reserva manual"}</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {editingReservaId
+                    ? "Corregí cliente, cancha, fecha o momento de una reserva activa."
+                    : "Creá un cliente si todavía no existe y dejalo seleccionado."}
+                </p>
               </div>
               <button
                 className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
@@ -784,14 +836,46 @@ export const AdminDashboardPage = () => {
                 </label>
               </div>
 
+              {reservaForm.canchaId && reservaForm.fecha && reservaForm.momento && (
+                <div
+                  className={`rounded-md border p-3 text-sm ${
+                    selectedSlotConflict
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  }`}
+                >
+                  {selectedSlotConflict
+                    ? `Turno ocupado por ${getClientLabel(selectedSlotConflict.User)} en ${
+                        selectedSlotConflict.Cancha?.nombre || "esa cancha"
+                      }.`
+                    : "Turno disponible para reservar."}
+                </div>
+              )}
+
               <button
                 className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:bg-slate-400"
                 type="submit"
-                disabled={isSubmittingReserva}
+                disabled={isSubmittingReserva || Boolean(selectedSlotConflict)}
               >
                 <Plus className="h-4 w-4" />
-                {isSubmittingReserva ? "Creando..." : "Crear reserva"}
+                {isSubmittingReserva
+                  ? editingReservaId
+                    ? "Guardando..."
+                    : "Creando..."
+                  : editingReservaId
+                    ? "Guardar reserva"
+                    : "Crear reserva"}
               </button>
+              {editingReservaId && (
+                <button
+                  className="ml-2 inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  type="button"
+                  onClick={resetReservaForm}
+                >
+                  <X className="h-4 w-4" />
+                  Cancelar edición
+                </button>
+              )}
             </form>
           </div>
 
@@ -1020,6 +1104,7 @@ export const AdminDashboardPage = () => {
           {filteredReservas.map((reserva) => {
             const canConfirm = reserva.estado === "pendiente_pago";
             const canCancel = ["pendiente_pago", "confirmada"].includes(reserva.estado);
+            const canEdit = activeReservaStates.includes(reserva.estado);
             const isUpdating = updatingReservaId === reserva.id;
 
             return (
@@ -1039,6 +1124,17 @@ export const AdminDashboardPage = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {canEdit && (
+                      <button
+                        className="rounded-md border border-slate-300 p-2 text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                        type="button"
+                        onClick={() => handleEditReserva(reserva)}
+                        disabled={isUpdating}
+                        title="Editar reserva"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    )}
                     {canConfirm && (
                       <button
                         className="rounded-md border border-emerald-200 p-2 text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"

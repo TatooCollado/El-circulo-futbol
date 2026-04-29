@@ -109,3 +109,74 @@ export const createReservaWithRules = async ({ usuarioId, canchaId, fecha, momen
     return reserva;
   });
 };
+
+export const updateReservaWithRules = async ({ reservaId, usuarioId, canchaId, fecha, momento, estado }) => {
+  return sequelize.transaction(async (transaction) => {
+    const reserva = await Reserva.findByPk(reservaId, { transaction });
+
+    if (!reserva) {
+      throw httpError(404, "Reserva no encontrada");
+    }
+
+    if (!ACTIVE_RESERVA_ESTADOS.includes(reserva.estado)) {
+      throw httpError(409, "La reserva no se puede editar en su estado actual");
+    }
+
+    const cancha = await Cancha.findByPk(canchaId, { transaction });
+
+    if (!cancha || !cancha.disponible) {
+      throw httpError(404, "Cancha no disponible");
+    }
+
+    await assertTurnoDisponible({
+      canchaId,
+      fecha,
+      momento,
+      excludeReservaId: reserva.id,
+      transaction
+    });
+
+    const nextEstado = estado || reserva.estado;
+    const nextVenceEn =
+      nextEstado === "pendiente_pago"
+        ? reserva.estado === "pendiente_pago" && reserva.venceEn && reserva.venceEn > new Date()
+          ? reserva.venceEn
+          : getReservaVencimiento()
+        : null;
+
+    await reserva.update(
+      {
+        usuarioId,
+        canchaId,
+        fecha,
+        momento,
+        estado: nextEstado,
+        precioFinal: cancha.precio,
+        venceEn: nextVenceEn
+      },
+      { transaction }
+    );
+
+    const [pago] = await Pago.findOrCreate({
+      where: { reservaId: reserva.id },
+      defaults: {
+        reservaId: reserva.id,
+        estado: nextEstado === "confirmada" ? "aprobado" : "pendiente",
+        monto: cancha.precio,
+        metodo: nextEstado === "confirmada" ? "manual" : null
+      },
+      transaction
+    });
+
+    await pago.update(
+      {
+        estado: nextEstado === "confirmada" ? "aprobado" : "pendiente",
+        monto: cancha.precio,
+        metodo: nextEstado === "confirmada" ? pago.metodo || "manual" : null
+      },
+      { transaction }
+    );
+
+    return reserva;
+  });
+};

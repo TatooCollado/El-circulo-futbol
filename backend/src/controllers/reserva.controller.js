@@ -1,7 +1,11 @@
 import { Op } from "sequelize";
 import { Cancha, Pago, Reserva, User } from "../models/index.js";
 import { hashPassword } from "../services/auth.service.js";
-import { createReservaWithRules, expirePendingReservations } from "../services/reserva.service.js";
+import {
+  createReservaWithRules,
+  expirePendingReservations,
+  updateReservaWithRules
+} from "../services/reserva.service.js";
 import { httpError } from "../utils/httpError.js";
 
 const reservaInclude = [
@@ -153,6 +157,34 @@ export const createReservaAdmin = async (req, res, next) => {
 
     return res.status(201).json({
       message: "Reserva creada correctamente",
+      reserva: reservaCompleta
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateReservaAdmin = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.body.usuarioId);
+
+    if (!user || !user.activo || user.rol !== "cliente") {
+      throw httpError(404, "Usuario no encontrado");
+    }
+
+    const reserva = await updateReservaWithRules({
+      reservaId: req.params.id,
+      usuarioId: req.body.usuarioId,
+      canchaId: req.body.canchaId,
+      fecha: req.body.fecha,
+      momento: req.body.momento,
+      estado: req.body.estado
+    });
+
+    const reservaCompleta = await Reserva.findByPk(reserva.id, { include: reservaInclude });
+
+    return res.json({
+      message: "Reserva actualizada correctamente",
       reserva: reservaCompleta
     });
   } catch (error) {

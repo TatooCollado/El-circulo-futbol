@@ -1,0 +1,35 @@
+meta {
+  name: 08 Editar reserva admin
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/reservas/{{reservaAdminId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "usuarioId": "{{usuarioIdCliente}}",
+    "canchaId": "{{canchaId}}",
+    "fecha": "{{fechaReserva}}",
+    "momento": "noche",
+    "estado": "confirmada"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.reserva.momento: eq noche
+  res.body.reserva.estado: eq confirmada
+}

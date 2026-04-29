@@ -31,6 +31,11 @@ export const reservaService = {
     return response.data;
   },
 
+  async updateReservaAdmin(id, payload) {
+    const response = await api.put(`/reservas/${id}`, payload);
+    return response.data;
+  },
+
   async confirmReserva(id) {
     const response = await api.put(`/reservas/${id}/confirmar`);
     return response.data;

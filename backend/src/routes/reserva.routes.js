@@ -7,7 +7,8 @@ import {
   createReservaAdmin,
   getClientesParaReserva,
   getMisReservas,
-  getReservas
+  getReservas,
+  updateReservaAdmin
 } from "../controllers/reserva.controller.js";
 import { requireAuth, requireRole } from "../middlewares/auth.middleware.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
@@ -56,6 +57,16 @@ reservaRoutes.post(
   createReservaAdminValidation,
   validateRequest,
   createReservaAdmin
+);
+
+reservaRoutes.put(
+  "/:id",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  reservaIdValidation,
+  createReservaAdminValidation,
+  validateRequest,
+  updateReservaAdmin
 );
 
 reservaRoutes.put(
