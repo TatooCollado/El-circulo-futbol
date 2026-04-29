@@ -1,7 +1,9 @@
 import { Router } from "express";
 import {
+  createCliente,
   createUser,
   deleteUser,
+  getClientes,
   getUserById,
   getUsers,
   updateUser
@@ -9,6 +11,7 @@ import {
 import { requireAuth, requireRole } from "../middlewares/auth.middleware.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
 import {
+  createClienteValidation,
   createUserValidation,
   listUsersValidation,
   updateUserValidation,
@@ -16,6 +19,22 @@ import {
 } from "../validations/user.validations.js";
 
 export const userRoutes = Router();
+
+userRoutes.get(
+  "/clientes",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  getClientes
+);
+
+userRoutes.post(
+  "/clientes",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  createClienteValidation,
+  validateRequest,
+  createCliente
+);
 
 userRoutes.use(requireAuth, requireRole("super_admin"));
 

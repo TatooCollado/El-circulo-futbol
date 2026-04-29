@@ -8,6 +8,7 @@ import { CanchasPage } from "./pages/CanchasPage.jsx";
 import { ReservarCanchaPage } from "./pages/ReservarCanchaPage.jsx";
 import { MisReservasPage } from "./pages/MisReservasPage.jsx";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage.jsx";
+import { AdminUsersPage } from "./pages/AdminUsersPage.jsx";
 import { SuperAdminUsersPage } from "./pages/SuperAdminUsersPage.jsx";
 import { SuperAdminReportsPage } from "./pages/SuperAdminReportsPage.jsx";
 import { NotFoundPage } from "./pages/NotFoundPage.jsx";
@@ -45,6 +46,15 @@ export const App = () => {
           element={
             <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
               <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/usuarios"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
+              <AdminUsersPage />
             </ProtectedRoute>
           }
         />

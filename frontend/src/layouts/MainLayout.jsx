@@ -21,6 +21,7 @@ const getNavItems = (user) => {
     return [
       ...publicItems,
       { to: "/admin", label: "Admin" },
+      { to: "/admin/usuarios", label: "Usuarios" },
       { to: "/admin/reportes", label: "Reportes" }
     ];
   }

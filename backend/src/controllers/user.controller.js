@@ -20,6 +20,26 @@ export const getUsers = async (req, res, next) => {
   }
 };
 
+export const getClientes = async (req, res, next) => {
+  try {
+    const clientes = await User.findAll({
+      where: {
+        rol: "cliente",
+        activo: true
+      },
+      attributes: ["id", "nombre", "apellido", "email", "activo", "createdAt"],
+      order: [
+        ["apellido", "ASC"],
+        ["nombre", "ASC"]
+      ]
+    });
+
+    return res.json({ clientes });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const getUserById = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -56,6 +76,41 @@ export const createUser = async (req, res, next) => {
     return res.status(201).json({
       message: "Usuario creado correctamente",
       user: sanitizeUser(user)
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const createCliente = async (req, res, next) => {
+  try {
+    const { nombre, apellido, email, password } = req.body;
+    const normalizedEmail = normalizeEmail(email);
+    const existingUser = await User.findOne({ where: { email: normalizedEmail } });
+
+    if (existingUser) {
+      throw httpError(409, "Ya existe un usuario con ese email");
+    }
+
+    const cliente = await User.create({
+      nombre,
+      apellido,
+      email: normalizedEmail,
+      password: await hashPassword(password),
+      rol: "cliente",
+      activo: true
+    });
+
+    return res.status(201).json({
+      message: "Cliente creado correctamente",
+      cliente: {
+        id: cliente.id,
+        nombre: cliente.nombre,
+        apellido: cliente.apellido,
+        email: cliente.email,
+        activo: cliente.activo,
+        createdAt: cliente.createdAt
+      }
     });
   } catch (error) {
     return next(error);
