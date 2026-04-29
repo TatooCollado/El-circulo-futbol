@@ -14,3 +14,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const isAuthEndpoint = error.config?.url?.startsWith("/auth/");
+
+    if (status === 401 && !isAuthEndpoint) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.dispatchEvent(new Event("auth:expired"));
+    }
+
+    return Promise.reject(error);
+  }
+);

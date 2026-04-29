@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authService } from "../services/authService.js";
 
 const AuthContext = createContext(null);
@@ -37,6 +37,20 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
   };
+
+  useEffect(() => {
+    const handleExpiredSession = () => {
+      setToken(null);
+      setUser(null);
+      window.location.assign("/login?session=expired");
+    };
+
+    window.addEventListener("auth:expired", handleExpiredSession);
+
+    return () => {
+      window.removeEventListener("auth:expired", handleExpiredSession);
+    };
+  }, []);
 
   const value = useMemo(
     () => ({

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
@@ -18,6 +18,7 @@ const getRedirectPath = (rol) => {
 export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const [form, setForm] = useState({
     email: "superadmin@demo.com",
@@ -25,6 +26,7 @@ export const LoginPage = () => {
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const sessionExpired = searchParams.get("session") === "expired";
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -58,6 +60,12 @@ export const LoginPage = () => {
         <h1 className="text-3xl font-bold">Ingresar</h1>
         <p className="text-slate-600">Accedé con tu cuenta para gestionar reservas.</p>
       </div>
+
+      {sessionExpired && (
+        <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          Tu sesión venció. Ingresá nuevamente para continuar.
+        </p>
+      )}
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <label className="block">
@@ -108,3 +116,4 @@ export const LoginPage = () => {
     </section>
   );
 };
+
