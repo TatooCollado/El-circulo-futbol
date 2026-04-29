@@ -1,6 +1,6 @@
-import { Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const getNavItems = (user) => {
@@ -38,6 +38,22 @@ const getNavItems = (user) => {
   return publicItems;
 };
 
+const getDesktopNavClass = ({ isActive }) =>
+  [
+    "rounded-md px-3 py-2 font-semibold transition",
+    isActive
+      ? "bg-emerald-50 text-emerald-700 shadow-sm ring-1 ring-emerald-100"
+      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+  ].join(" ");
+
+const getMobileNavClass = ({ isActive }) =>
+  [
+    "block rounded-md px-3 py-2 font-medium transition",
+    isActive
+      ? "bg-emerald-50 text-emerald-700"
+      : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+  ].join(" ");
+
 export const MainLayout = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,11 +68,23 @@ export const MainLayout = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
-        <nav className="mx-auto max-w-6xl px-4 py-4">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+        <nav className="mx-auto max-w-6xl px-4 py-3">
           <div className="flex items-center justify-between gap-4">
-            <Link to="/" className="text-lg font-bold" onClick={closeMenu}>
-              El Circulo Futbol
+            <Link
+              to="/"
+              className="flex items-center gap-3 rounded-md pr-2 text-slate-950"
+              onClick={closeMenu}
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-md bg-emerald-600 text-sm font-black text-white shadow-sm shadow-emerald-900/20">
+                EC
+              </span>
+              <span className="leading-tight">
+                <span className="block text-lg font-black tracking-normal">El Círculo</span>
+                <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Fútbol club
+                </span>
+              </span>
             </Link>
 
             <button
@@ -68,32 +96,36 @@ export const MainLayout = () => {
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
 
-            <div className="hidden items-center gap-4 text-sm md:flex">
+            <div className="hidden items-center gap-2 text-sm md:flex">
               {navItems.map((item) => (
-                <Link
-                  className="font-medium text-slate-700 hover:text-slate-950"
-                  key={item.to}
-                  to={item.to}
-                >
+                <NavLink className={getDesktopNavClass} end={item.to === "/admin"} key={item.to} to={item.to}>
                   {item.label}
-                </Link>
+                </NavLink>
               ))}
 
+              <div className="mx-2 h-8 w-px bg-slate-200" />
+
               {isAuthenticated ? (
-                <button
-                  className="rounded-md bg-slate-950 px-3 py-2 text-white hover:bg-slate-800"
-                  type="button"
-                  onClick={handleLogout}
-                >
-                  Salir
-                </button>
+                <div className="flex items-center gap-3">
+                  <div className="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
+                    {user?.nombre || "Usuario"}
+                  </div>
+                  <button
+                    className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-3 py-2 font-semibold text-white transition hover:bg-slate-800"
+                    type="button"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Salir
+                  </button>
+                </div>
               ) : (
                 <>
-                  <Link className="font-medium text-slate-700 hover:text-slate-950" to="/login">
+                  <NavLink className={getDesktopNavClass} to="/login">
                     Ingresar
-                  </Link>
+                  </NavLink>
                   <Link
-                    className="rounded-md bg-emerald-600 px-3 py-2 font-semibold text-white hover:bg-emerald-700"
+                    className="rounded-md bg-emerald-600 px-3 py-2 font-semibold text-white shadow-sm shadow-emerald-900/20 transition hover:bg-emerald-700"
                     to="/register"
                   >
                     Crear cuenta
@@ -106,33 +138,31 @@ export const MainLayout = () => {
           {isMenuOpen && (
             <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm md:hidden">
               {navItems.map((item) => (
-                <Link
-                  className="block rounded-md px-3 py-2 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                <NavLink
+                  className={getMobileNavClass}
+                  end={item.to === "/admin"}
                   key={item.to}
                   to={item.to}
                   onClick={closeMenu}
                 >
                   {item.label}
-                </Link>
+                </NavLink>
               ))}
 
               {isAuthenticated ? (
                 <button
-                  className="w-full rounded-md bg-slate-950 px-3 py-2 text-left font-semibold text-white"
+                  className="flex w-full items-center gap-2 rounded-md bg-slate-950 px-3 py-2 text-left font-semibold text-white"
                   type="button"
                   onClick={handleLogout}
                 >
+                  <LogOut className="h-4 w-4" />
                   Salir
                 </button>
               ) : (
                 <>
-                  <Link
-                    className="block rounded-md px-3 py-2 font-medium text-slate-700 hover:bg-slate-100"
-                    to="/login"
-                    onClick={closeMenu}
-                  >
+                  <NavLink className={getMobileNavClass} to="/login" onClick={closeMenu}>
                     Ingresar
-                  </Link>
+                  </NavLink>
                   <Link
                     className="block rounded-md bg-emerald-600 px-3 py-2 font-semibold text-white"
                     to="/register"

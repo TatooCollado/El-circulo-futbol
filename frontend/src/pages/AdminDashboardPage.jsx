@@ -678,7 +678,7 @@ export const AdminDashboardPage = () => {
           </div>
 
           <div
-            className={`rounded-lg border bg-white p-4 shadow-sm outline-none transition ${
+            className={`scroll-mt-24 rounded-lg border bg-white p-4 shadow-sm outline-none transition ${
               editingReservaId ? "border-emerald-300 ring-2 ring-emerald-100" : "border-slate-200"
             }`}
             ref={reservaFormRef}
