@@ -1,0 +1,37 @@
+meta {
+  name: 07 Crear cliente para reserva
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/reservas/clientes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Cliente",
+    "apellido": "Reserva",
+    "email": "cliente.reserva{{$timestamp}}@demo.com",
+    "password": "123456"
+  }
+}
+
+vars:post-response {
+  usuarioIdCliente: res.body.cliente.id
+}
+
+assert {
+  res.status: eq 201
+  res.body.cliente.email: isString
+}

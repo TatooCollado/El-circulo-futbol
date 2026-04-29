@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   cancelReserva,
+  createClienteParaReserva,
   confirmReserva,
   createReserva,
   createReservaAdmin,
@@ -11,6 +12,7 @@ import {
 import { requireAuth, requireRole } from "../middlewares/auth.middleware.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
 import {
+  createClienteReservaValidation,
   createReservaAdminValidation,
   createReservaValidation,
   reservaIdValidation
@@ -27,6 +29,15 @@ reservaRoutes.get(
   requireAuth,
   requireRole("admin", "super_admin"),
   getClientesParaReserva
+);
+
+reservaRoutes.post(
+  "/clientes",
+  requireAuth,
+  requireRole("admin", "super_admin"),
+  createClienteReservaValidation,
+  validateRequest,
+  createClienteParaReserva
 );
 
 reservaRoutes.post(

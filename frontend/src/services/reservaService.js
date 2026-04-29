@@ -21,6 +21,11 @@ export const reservaService = {
     return response.data;
   },
 
+  async createClienteParaReserva(payload) {
+    const response = await api.post("/reservas/clientes", payload);
+    return response.data;
+  },
+
   async createReservaAdmin(payload) {
     const response = await api.post("/reservas/admin", payload);
     return response.data;

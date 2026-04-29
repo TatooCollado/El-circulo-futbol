@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Cancha, Pago, Reserva, User } from "../models/index.js";
+import { hashPassword } from "../services/auth.service.js";
 import { createReservaWithRules, expirePendingReservations } from "../services/reserva.service.js";
 import { httpError } from "../utils/httpError.js";
 
@@ -17,6 +18,7 @@ const reservaInclude = [
 ];
 
 const canManageReservas = (user) => ["admin", "super_admin"].includes(user?.rol);
+const normalizeEmail = (email) => email.toLowerCase().trim();
 
 export const getReservas = async (req, res, next) => {
   try {
@@ -72,6 +74,39 @@ export const getClientesParaReserva = async (req, res, next) => {
     });
 
     return res.json({ clientes });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const createClienteParaReserva = async (req, res, next) => {
+  try {
+    const { nombre, apellido, email, password } = req.body;
+    const normalizedEmail = normalizeEmail(email);
+    const existingUser = await User.findOne({ where: { email: normalizedEmail } });
+
+    if (existingUser) {
+      throw httpError(409, "Ya existe un usuario con ese email");
+    }
+
+    const cliente = await User.create({
+      nombre,
+      apellido,
+      email: normalizedEmail,
+      password: await hashPassword(password),
+      rol: "cliente",
+      activo: true
+    });
+
+    return res.status(201).json({
+      message: "Cliente creado correctamente",
+      cliente: {
+        id: cliente.id,
+        nombre: cliente.nombre,
+        apellido: cliente.apellido,
+        email: cliente.email
+      }
+    });
   } catch (error) {
     return next(error);
   }
