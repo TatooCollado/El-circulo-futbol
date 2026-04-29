@@ -29,9 +29,12 @@ export const ReservarCanchaPage = () => {
     fecha: today,
     momento: "manana"
   });
+  const [disponibilidad, setDisponibilidad] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDisponibilidad, setIsLoadingDisponibilidad] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [availabilityError, setAvailabilityError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
@@ -49,9 +52,59 @@ export const ReservarCanchaPage = () => {
     loadCancha();
   }, [canchaId]);
 
+  useEffect(() => {
+    if (!form.fecha) {
+      setDisponibilidad(null);
+      return;
+    }
+
+    let shouldIgnore = false;
+
+    const loadDisponibilidad = async () => {
+      try {
+        setIsLoadingDisponibilidad(true);
+        setAvailabilityError("");
+        const data = await canchaService.getDisponibilidad(canchaId, form.fecha);
+
+        if (shouldIgnore) {
+          return;
+        }
+
+        setDisponibilidad(data);
+
+        if (data.disponibles.length > 0) {
+          setForm((currentForm) =>
+            data.disponibles.includes(currentForm.momento)
+              ? currentForm
+              : { ...currentForm, momento: data.disponibles[0] }
+          );
+        }
+      } catch (loadError) {
+        if (!shouldIgnore) {
+          setDisponibilidad(null);
+          setAvailabilityError(getApiErrorMessage(loadError));
+        }
+      } finally {
+        if (!shouldIgnore) {
+          setIsLoadingDisponibilidad(false);
+        }
+      }
+    };
+
+    loadDisponibilidad();
+
+    return () => {
+      shouldIgnore = true;
+    };
+  }, [canchaId, form.fecha]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
+  };
+
+  const handleMomentoChange = (momento) => {
+    setForm((currentForm) => ({ ...currentForm, momento }));
   };
 
   const handleSubmit = async (event) => {
@@ -61,6 +114,11 @@ export const ReservarCanchaPage = () => {
 
     if (!form.fecha || !form.momento) {
       setError("Elegí una fecha y un momento para reservar.");
+      return;
+    }
+
+    if (disponibilidad && !disponibilidad.disponibles.includes(form.momento)) {
+      setError("Ese momento ya está ocupado. Elegí otro turno disponible.");
       return;
     }
 
@@ -102,6 +160,10 @@ export const ReservarCanchaPage = () => {
     );
   }
 
+  const occupiedMomentos = disponibilidad?.ocupados || [];
+  const availableMomentos = disponibilidad?.disponibles || [];
+  const hasAvailableMomentos = !disponibilidad || availableMomentos.length > 0;
+
   return (
     <section className="mx-auto max-w-3xl space-y-6">
       <Link className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700" to="/canchas">
@@ -141,24 +203,50 @@ export const ReservarCanchaPage = () => {
               />
             </label>
 
-            <label className="block">
+            <div>
               <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
                 <Clock className="h-4 w-4 text-emerald-700" />
                 Momento
               </span>
-              <select
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-                name="momento"
-                value={form.momento}
-                onChange={handleChange}
-              >
+              <div className="mt-2 grid gap-2 sm:grid-cols-3">
                 {momentos.map((momento) => (
-                  <option key={momento.value} value={momento.value}>
-                    {momento.label}
-                  </option>
+                  <button
+                    className={`rounded-md border px-3 py-2 text-left text-sm font-semibold transition ${
+                      form.momento === momento.value
+                        ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                        : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                    } disabled:bg-slate-100 disabled:text-slate-400`}
+                    disabled={occupiedMomentos.includes(momento.value)}
+                    key={momento.value}
+                    type="button"
+                    onClick={() => handleMomentoChange(momento.value)}
+                  >
+                    <span className="block">{momento.label}</span>
+                    <span className="mt-1 block text-xs font-medium">
+                      {occupiedMomentos.includes(momento.value) ? "Ocupado" : "Disponible"}
+                    </span>
+                  </button>
                 ))}
-              </select>
-            </label>
+              </div>
+            </div>
+
+            {isLoadingDisponibilidad && (
+              <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                Consultando disponibilidad...
+              </p>
+            )}
+
+            {availabilityError && (
+              <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {availabilityError}
+              </p>
+            )}
+
+            {!isLoadingDisponibilidad && disponibilidad && !hasAvailableMomentos && (
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                No quedan turnos disponibles para esta fecha.
+              </p>
+            )}
 
             {error && (
               <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -175,7 +263,7 @@ export const ReservarCanchaPage = () => {
             <button
               className="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoadingDisponibilidad || !hasAvailableMomentos}
             >
               {isSubmitting ? "Reservando..." : "Confirmar reserva"}
             </button>

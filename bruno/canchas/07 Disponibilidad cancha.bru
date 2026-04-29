@@ -1,0 +1,18 @@
+meta {
+  name: 07 Disponibilidad cancha
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/canchas/{{canchaId}}/disponibilidad?fecha={{fechaReserva}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.momentos: isArray
+  res.body.ocupados: isArray
+  res.body.disponibles: isArray
+}

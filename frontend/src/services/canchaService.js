@@ -16,6 +16,13 @@ export const canchaService = {
     return response.data;
   },
 
+  async getDisponibilidad(id, fecha) {
+    const response = await api.get(`/canchas/${id}/disponibilidad`, {
+      params: { fecha }
+    });
+    return response.data;
+  },
+
   async createCancha(payload) {
     const response = await api.post("/canchas", payload);
     return response.data;

@@ -2,6 +2,22 @@ import { body, param, query } from "express-validator";
 
 const tiposCancha = ["futbol_5", "futbol_7", "futbol_11"];
 
+const validateFecha = (value) => {
+  const selectedDate = new Date(`${value}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (Number.isNaN(selectedDate.getTime())) {
+    throw new Error("La fecha no es valida");
+  }
+
+  if (selectedDate < today) {
+    throw new Error("La fecha no puede ser anterior a hoy");
+  }
+
+  return true;
+};
+
 export const canchaIdValidation = [
   param("id")
     .isInt({ min: 1 })
@@ -13,6 +29,16 @@ export const listCanchasValidation = [
     .optional()
     .isBoolean()
     .withMessage("incluirNoDisponibles debe ser true o false")
+];
+
+export const canchaAvailabilityValidation = [
+  ...canchaIdValidation,
+  query("fecha")
+    .notEmpty()
+    .withMessage("La fecha es obligatoria")
+    .isISO8601({ strict: true, strictSeparator: true })
+    .withMessage("La fecha debe tener formato YYYY-MM-DD")
+    .custom(validateFecha)
 ];
 
 export const canchaValidation = [
@@ -47,4 +73,3 @@ export const canchaValidation = [
     .isURL()
     .withMessage("La imagen debe ser una URL valida")
 ];
-

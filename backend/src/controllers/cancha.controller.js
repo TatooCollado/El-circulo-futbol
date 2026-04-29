@@ -1,6 +1,10 @@
 import { Op } from "sequelize";
 import { Cancha, Reserva } from "../models/index.js";
+import { expirePendingReservations } from "../services/reserva.service.js";
 import { httpError } from "../utils/httpError.js";
+
+const momentos = ["manana", "tarde", "noche"];
+const activeReservaStates = ["pendiente_pago", "confirmada"];
 
 const normalizeCanchaPayload = (body) => ({
   nombre: body.nombre?.trim(),
@@ -47,6 +51,41 @@ export const getCanchaById = async (req, res, next) => {
     }
 
     return res.json({ cancha });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getCanchaDisponibilidad = async (req, res, next) => {
+  try {
+    await expirePendingReservations();
+
+    const cancha = await Cancha.findByPk(req.params.id);
+
+    if (!cancha || !cancha.disponible) {
+      throw httpError(404, "Cancha no encontrada");
+    }
+
+    const reservas = await Reserva.findAll({
+      attributes: ["momento"],
+      where: {
+        canchaId: cancha.id,
+        fecha: req.query.fecha,
+        estado: {
+          [Op.in]: activeReservaStates
+        }
+      }
+    });
+    const ocupados = reservas.map((reserva) => reserva.momento);
+    const disponibles = momentos.filter((momento) => !ocupados.includes(momento));
+
+    return res.json({
+      canchaId: cancha.id,
+      fecha: req.query.fecha,
+      momentos,
+      ocupados,
+      disponibles
+    });
   } catch (error) {
     return next(error);
   }

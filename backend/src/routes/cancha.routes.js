@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createCancha,
   deleteCancha,
+  getCanchaDisponibilidad,
   getCanchaById,
   getCanchas,
   updateCancha
@@ -9,6 +10,7 @@ import {
 import { optionalAuth, requireAuth, requireRole } from "../middlewares/auth.middleware.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
 import {
+  canchaAvailabilityValidation,
   canchaIdValidation,
   canchaValidation,
   listCanchasValidation
@@ -17,6 +19,13 @@ import {
 export const canchaRoutes = Router();
 
 canchaRoutes.get("/", listCanchasValidation, validateRequest, optionalAuth, getCanchas);
+
+canchaRoutes.get(
+  "/:id/disponibilidad",
+  canchaAvailabilityValidation,
+  validateRequest,
+  getCanchaDisponibilidad
+);
 
 canchaRoutes.get("/:id", canchaIdValidation, validateRequest, optionalAuth, getCanchaById);
 
