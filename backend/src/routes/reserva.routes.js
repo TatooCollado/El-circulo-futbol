@@ -17,11 +17,18 @@ import {
 
 export const reservaRoutes = Router();
 
-reservaRoutes.get("/", requireAuth, getReservas);
+reservaRoutes.get("/", requireAuth, requireRole("admin", "super_admin"), getReservas);
 
-reservaRoutes.get("/mis-reservas", requireAuth, getMisReservas);
+reservaRoutes.get("/mis-reservas", requireAuth, requireRole("cliente"), getMisReservas);
 
-reservaRoutes.post("/", requireAuth, createReservaValidation, validateRequest, createReserva);
+reservaRoutes.post(
+  "/",
+  requireAuth,
+  requireRole("cliente"),
+  createReservaValidation,
+  validateRequest,
+  createReserva
+);
 
 reservaRoutes.post(
   "/admin",
@@ -35,6 +42,7 @@ reservaRoutes.post(
 reservaRoutes.put(
   "/:id/cancelar",
   requireAuth,
+  requireRole("cliente", "admin", "super_admin"),
   reservaIdValidation,
   validateRequest,
   cancelReserva

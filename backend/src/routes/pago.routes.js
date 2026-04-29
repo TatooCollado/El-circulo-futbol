@@ -5,7 +5,7 @@ import {
   receiveWebhook,
   simulatePago
 } from "../controllers/pago.controller.js";
-import { requireAuth } from "../middlewares/auth.middleware.js";
+import { requireAuth, requireRole } from "../middlewares/auth.middleware.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
 import {
   createPreferenciaValidation,
@@ -18,6 +18,7 @@ export const pagoRoutes = Router();
 pagoRoutes.post(
   "/crear-preferencia",
   requireAuth,
+  requireRole("cliente"),
   createPreferenciaValidation,
   validateRequest,
   createPreferenciaPago
@@ -25,11 +26,12 @@ pagoRoutes.post(
 
 pagoRoutes.post("/webhook", receiveWebhook);
 
-pagoRoutes.get("/:id", requireAuth, pagoIdValidation, validateRequest, getPagoById);
+pagoRoutes.get("/:id", requireAuth, requireRole("cliente"), pagoIdValidation, validateRequest, getPagoById);
 
 pagoRoutes.post(
   "/:id/simular",
   requireAuth,
+  requireRole("cliente"),
   pagoIdValidation,
   simulatePagoValidation,
   validateRequest,

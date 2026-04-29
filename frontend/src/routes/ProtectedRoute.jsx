@@ -10,7 +10,7 @@ export const ProtectedRoute = ({ allowedRoles, children }) => {
   }
 
   if (!allowedRoles.includes(rol)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/403" replace state={{ from: location.pathname }} />;
   }
 
   return children;
