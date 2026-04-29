@@ -59,9 +59,18 @@ export const App = () => {
         />
 
         <Route
+          path="/admin/reportes"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
+              <SuperAdminReportsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/super-admin/reportes"
           element={
-            <ProtectedRoute allowedRoles={["super_admin"]}>
+            <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
               <SuperAdminReportsPage />
             </ProtectedRoute>
           }

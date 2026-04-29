@@ -20,7 +20,8 @@ const getNavItems = (user) => {
   if (user.rol === "admin") {
     return [
       ...publicItems,
-      { to: "/admin", label: "Admin" }
+      { to: "/admin", label: "Admin" },
+      { to: "/admin/reportes", label: "Reportes" }
     ];
   }
 
@@ -29,7 +30,7 @@ const getNavItems = (user) => {
       ...publicItems,
       { to: "/admin", label: "Admin" },
       { to: "/super-admin/usuarios", label: "Usuarios" },
-      { to: "/super-admin/reportes", label: "Reportes" }
+      { to: "/admin/reportes", label: "Reportes" }
     ];
   }
 
@@ -151,4 +152,3 @@ export const MainLayout = () => {
     </div>
   );
 };
-

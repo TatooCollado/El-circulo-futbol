@@ -4,7 +4,6 @@ import { requireAuth, requireRole } from "../middlewares/auth.middleware.js";
 
 export const reportRoutes = Router();
 
-reportRoutes.use(requireAuth, requireRole("super_admin"));
+reportRoutes.use(requireAuth, requireRole("admin", "super_admin"));
 
 reportRoutes.get("/general", getGeneralReport);
-
