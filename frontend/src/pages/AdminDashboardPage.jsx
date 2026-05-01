@@ -9,7 +9,7 @@ import {
   DollarSign,
   Eye,
   EyeOff,
-  Map,
+  Map as MapIcon,
   Pencil,
   Plus,
   Search,
@@ -666,7 +666,7 @@ export const AdminDashboardPage = () => {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          icon={Map}
+          icon={MapIcon}
           label="Canchas disponibles"
           value={`${canchasDisponibles.length}/${canchas.length}`}
           detail="Alta, edición y baja lógica"
