@@ -37,8 +37,6 @@ DATABASE_URL=postgresql://...
 JWT_SECRET=valor_largo_y_privado
 JWT_EXPIRES_IN=7d
 FRONTEND_URL=https://tu-front.vercel.app
-MERCADOPAGO_ACCESS_TOKEN=TEST-...
-MERCADOPAGO_PUBLIC_KEY=TEST-...
 ```
 
 Luego probar:
@@ -57,10 +55,11 @@ Variables necesarias:
 
 ```txt
 VITE_API_URL=https://tu-backend.onrender.com/api
-VITE_MERCADOPAGO_PUBLIC_KEY=TEST-...
 ```
 
 El archivo `frontend/vercel.json` ya tiene la rewrite necesaria para que React Router funcione al refrescar rutas internas.
+
+El flujo de pagos actual es demo/simulado, asi que no necesita credenciales reales de Mercado Pago para deployar.
 
 ## 4. Ajuste final de CORS
 

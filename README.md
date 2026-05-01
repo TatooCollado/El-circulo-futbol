@@ -321,9 +321,6 @@ JWT_SECRET=change_this_secret
 JWT_EXPIRES_IN=7d
 
 FRONTEND_URL=http://localhost:5173
-
-MERCADOPAGO_ACCESS_TOKEN=TEST-your-access-token
-MERCADOPAGO_PUBLIC_KEY=TEST-your-public-key
 ```
 
 Instalar dependencias e inicializar base:
@@ -363,7 +360,6 @@ Crear `frontend/.env` a partir de `frontend/.env.example`.
 
 ```env
 VITE_API_URL=http://localhost:3001/api
-VITE_MERCADOPAGO_PUBLIC_KEY=TEST-your-public-key
 ```
 
 Instalar dependencias e iniciar:
@@ -550,8 +546,6 @@ DATABASE_URL
 JWT_SECRET
 JWT_EXPIRES_IN
 FRONTEND_URL
-MERCADOPAGO_ACCESS_TOKEN
-MERCADOPAGO_PUBLIC_KEY
 NODE_ENV=production
 ```
 
@@ -565,7 +559,6 @@ Frontend:
 
 ```txt
 VITE_API_URL=https://URL-DEL-BACKEND/api
-VITE_MERCADOPAGO_PUBLIC_KEY
 ```
 
 Despues de deployar el frontend, actualizar `FRONTEND_URL` en el backend para que CORS permita el dominio de Vercel.
