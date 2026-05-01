@@ -1,11 +1,15 @@
 import {
+  Activity,
   Ban,
   CalendarDays,
   Check,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
+  DollarSign,
   Eye,
   EyeOff,
+  Map,
   Pencil,
   Plus,
   Search,
@@ -52,6 +56,12 @@ const estadoLabels = {
 
 const activeReservaStates = ["pendiente_pago", "confirmada"];
 
+const canchaTypeLabels = {
+  futbol_5: "Fútbol 5",
+  futbol_7: "Fútbol 7",
+  futbol_11: "Fútbol 11"
+};
+
 const momentoLabels = {
   manana: "Mañana",
   tarde: "Tarde",
@@ -65,6 +75,21 @@ const momentoOrder = {
 };
 
 const weekDays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+const estadoBadgeClasses = {
+  pendiente_pago: "bg-amber-50 text-amber-700 ring-amber-100",
+  confirmada: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  cancelada: "bg-red-50 text-red-700 ring-red-100",
+  vencida: "bg-slate-100 text-slate-700 ring-slate-200",
+  rechazada: "bg-red-50 text-red-700 ring-red-100"
+};
+
+const statToneClasses = {
+  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  sky: "bg-sky-50 text-sky-700 ring-sky-100",
+  amber: "bg-amber-50 text-amber-700 ring-amber-100",
+  slate: "bg-slate-100 text-slate-700 ring-slate-200"
+};
 
 const formatPrice = (price) => {
   return Number(price).toLocaleString("es-AR", {
@@ -142,8 +167,44 @@ const buildCalendarDays = (monthValue, reservas) => {
   return days;
 };
 
+const StatCard = ({ icon: Icon, label, value, detail, tone = "emerald" }) => (
+  <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <p className="text-sm font-medium text-slate-500">{label}</p>
+        <p className="mt-1 text-3xl font-black text-slate-950">{value}</p>
+        {detail && <p className="mt-2 text-sm text-slate-500">{detail}</p>}
+      </div>
+      <div className={`rounded-md p-3 ring-1 ${statToneClasses[tone]}`}>
+        <Icon className="h-5 w-5" />
+      </div>
+    </div>
+  </article>
+);
+
+const SectionTitle = ({ title, description, action }) => (
+  <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+    <div>
+      <h2 className="text-xl font-black text-slate-950">{title}</h2>
+      {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+    </div>
+    {action}
+  </div>
+);
+
+const EstadoBadge = ({ estado }) => (
+  <span
+    className={`rounded-md px-2 py-1 text-xs font-bold ring-1 ${
+      estadoBadgeClasses[estado] || "bg-slate-100 text-slate-700 ring-slate-200"
+    }`}
+  >
+    {estadoLabels[estado] || estado}
+  </span>
+);
+
 export const AdminDashboardPage = () => {
   const reservaFormRef = useRef(null);
+  const today = getLocalDateString();
   const [canchas, setCanchas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [reservas, setReservas] = useState([]);
@@ -173,6 +234,26 @@ export const AdminDashboardPage = () => {
   const canchasDisponibles = useMemo(
     () => canchas.filter((cancha) => cancha.disponible),
     [canchas]
+  );
+
+  const reservasPendientes = useMemo(
+    () => activeReservas.filter((reserva) => reserva.estado === "pendiente_pago"),
+    [activeReservas]
+  );
+
+  const reservasConfirmadas = useMemo(
+    () => activeReservas.filter((reserva) => reserva.estado === "confirmada"),
+    [activeReservas]
+  );
+
+  const reservasHoy = useMemo(
+    () => activeReservas.filter((reserva) => reserva.fecha === today),
+    [activeReservas, today]
+  );
+
+  const ingresosActivos = useMemo(
+    () => activeReservas.reduce((total, reserva) => total + Number(reserva.precioFinal || 0), 0),
+    [activeReservas]
   );
 
   const reservasConFiltrosOperativos = useMemo(() => {
@@ -556,9 +637,19 @@ export const AdminDashboardPage = () => {
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Panel admin</h1>
-        <p className="mt-2 text-slate-600">Gestioná canchas, disponibilidad y reservas.</p>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="inline-flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+            <Activity className="h-4 w-4" />
+            Operación diaria
+          </p>
+          <h1 className="mt-3 text-4xl font-black text-slate-950">Panel admin</h1>
+          <p className="mt-2 text-slate-600">Gestioná canchas, disponibilidad y reservas desde una vista operativa.</p>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-right shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Reservas de hoy</p>
+          <p className="mt-1 text-2xl font-black text-slate-950">{reservasHoy.length}</p>
+        </div>
       </div>
 
       {(error || success) && (
@@ -573,27 +664,43 @@ export const AdminDashboardPage = () => {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Canchas totales</p>
-          <p className="mt-1 text-3xl font-bold">{canchas.length}</p>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Disponibles</p>
-          <p className="mt-1 text-3xl font-bold">{canchasDisponibles.length}</p>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Reservas activas</p>
-          <p className="mt-1 text-3xl font-bold">{activeReservas.length}</p>
-        </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={Map}
+          label="Canchas disponibles"
+          value={`${canchasDisponibles.length}/${canchas.length}`}
+          detail="Alta, edición y baja lógica"
+        />
+        <StatCard
+          icon={ClipboardList}
+          label="Reservas activas"
+          value={activeReservas.length}
+          detail={`${reservasConfirmadas.length} confirmadas`}
+          tone="sky"
+        />
+        <StatCard
+          icon={CalendarDays}
+          label="Pendientes de pago"
+          value={reservasPendientes.length}
+          detail="Requieren seguimiento"
+          tone="amber"
+        />
+        <StatCard
+          icon={DollarSign}
+          label="Importe activo"
+          value={formatPrice(ingresosActivos)}
+          detail="Reservas activas actuales"
+          tone="slate"
+        />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <section className="space-y-4">
+      <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+        <section className="space-y-4 xl:sticky xl:top-24 xl:self-start">
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="text-xl font-bold">
-              {editingCanchaId ? "Editar cancha" : "Nueva cancha"}
-            </h2>
+            <SectionTitle
+              title={editingCanchaId ? "Editar cancha" : "Nueva cancha"}
+              description="Administrá disponibilidad, tipo y precio."
+            />
 
             <form className="mt-4 space-y-3" onSubmit={handleSubmitCancha}>
               <label className="block">
@@ -684,24 +791,24 @@ export const AdminDashboardPage = () => {
             ref={reservaFormRef}
             tabIndex={-1}
           >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-xl font-bold">{editingReservaId ? "Editar reserva" : "Reserva manual"}</h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {editingReservaId
-                    ? "Corregí cliente, cancha, fecha o momento de una reserva activa."
-                    : "Creá un cliente si todavía no existe y dejalo seleccionado."}
-                </p>
-              </div>
-              <button
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
-                type="button"
-                onClick={() => setShowClienteForm((current) => !current)}
-              >
-                <UserPlus className="h-4 w-4" />
-                Nuevo cliente
-              </button>
-            </div>
+            <SectionTitle
+              title={editingReservaId ? "Editar reserva" : "Reserva manual"}
+              description={
+                editingReservaId
+                  ? "Corregí cliente, cancha, fecha o momento de una reserva activa."
+                  : "Creá un cliente si todavía no existe y dejalo seleccionado."
+              }
+              action={
+                <button
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+                  type="button"
+                  onClick={() => setShowClienteForm((current) => !current)}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Nuevo cliente
+                </button>
+              }
+            />
 
             {showClienteForm && (
               <form
@@ -891,15 +998,28 @@ export const AdminDashboardPage = () => {
             </form>
           </div>
 
-          <div className="space-y-3">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <SectionTitle
+              title="Canchas del complejo"
+              description="Estado operativo y acciones rápidas."
+              action={
+                <span className="rounded-md bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-700">
+                  {canchas.length}
+                </span>
+              }
+            />
+            <div className="mt-4 max-h-[430px] space-y-3 overflow-auto pr-1">
             {canchas.map((cancha) => (
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={cancha.id}>
+              <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={cancha.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-bold text-slate-950">{cancha.nombre}</h3>
-                    <p className="text-sm text-slate-600">
-                      {cancha.tipo.replace("_", " ")} · {formatPrice(cancha.precio)}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-black text-slate-950">{cancha.nombre}</h3>
+                      <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-slate-700 ring-1 ring-slate-200">
+                        {canchaTypeLabels[cancha.tipo] || cancha.tipo}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-lg font-black text-slate-950">{formatPrice(cancha.precio)}</p>
                     <p className={`mt-1 text-sm font-semibold ${cancha.disponible ? "text-emerald-700" : "text-red-700"}`}>
                       {cancha.disponible ? "Disponible" : "No disponible"}
                     </p>
@@ -926,27 +1046,26 @@ export const AdminDashboardPage = () => {
                 </div>
               </article>
             ))}
+            </div>
           </div>
         </section>
 
         <section className="space-y-4">
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <h2 className="text-xl font-bold">Reservas</h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Agenda, búsqueda por cliente y filtros operativos.
-                </p>
-              </div>
-              <button
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                type="button"
-                onClick={handleClearFilters}
-              >
-                <X className="h-4 w-4" />
-                Limpiar
-              </button>
-            </div>
+            <SectionTitle
+              title="Agenda y filtros"
+              description="Búsqueda por cliente, cancha, fecha y estado."
+              action={
+                <button
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  type="button"
+                  onClick={handleClearFilters}
+                >
+                  <X className="h-4 w-4" />
+                  Limpiar
+                </button>
+              }
+            />
 
             <div className="mt-4 grid gap-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
               <label className="relative block">
@@ -1040,8 +1159,13 @@ export const AdminDashboardPage = () => {
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-emerald-700" />
-                <h3 className="font-bold capitalize text-slate-950">{getMonthLabel(calendarMonth)}</h3>
+                <div className="rounded-md bg-emerald-50 p-2 text-emerald-700 ring-1 ring-emerald-100">
+                  <CalendarDays className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-black capitalize text-slate-950">{getMonthLabel(calendarMonth)}</h3>
+                  <p className="text-sm text-slate-500">Click en un día para filtrar la lista.</p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <button
@@ -1073,7 +1197,7 @@ export const AdminDashboardPage = () => {
               {calendarDays.map((day) =>
                 day.date ? (
                   <button
-                    className={`min-h-20 rounded-md border p-2 text-left transition hover:border-emerald-300 hover:bg-emerald-50 ${
+                    className={`min-h-24 rounded-md border p-2 text-left transition hover:border-emerald-300 hover:bg-emerald-50 ${
                       filters.fecha === day.date
                         ? "border-emerald-500 bg-emerald-50"
                         : "border-slate-200 bg-white"
@@ -1082,16 +1206,18 @@ export const AdminDashboardPage = () => {
                     type="button"
                     onClick={() => handleCalendarDayClick(day.date)}
                   >
-                    <span className="text-sm font-bold text-slate-800">{day.day}</span>
-                    {day.reservas.length > 0 && (
-                      <span className="mt-1 block rounded-full bg-emerald-100 px-2 py-0.5 text-center text-[11px] font-bold text-emerald-800">
-                        {day.reservas.length}
-                      </span>
-                    )}
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-bold text-slate-800">{day.day}</span>
+                      {day.reservas.length > 0 && (
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                          {day.reservas.length}
+                        </span>
+                      )}
+                    </span>
                     <span className="mt-1 block space-y-0.5">
                       {day.reservas.slice(0, 2).map((reserva) => (
                         <span
-                          className="block truncate text-[11px] text-slate-500"
+                          className="block truncate rounded-sm bg-slate-50 px-1.5 py-0.5 text-[11px] font-medium text-slate-600"
                           key={reserva.id}
                           title={`${getClientLabel(reserva.User)} - ${reserva.Cancha?.nombre || "Cancha"}`}
                         >
@@ -1101,84 +1227,104 @@ export const AdminDashboardPage = () => {
                     </span>
                   </button>
                 ) : (
-                  <div className="min-h-20 rounded-md border border-transparent" key={day.key} />
+                  <div className="min-h-24 rounded-md border border-transparent" key={day.key} />
                 )
               )}
             </div>
           </div>
 
-          {filteredReservas.length === 0 && (
-            <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
-              No hay reservas para los filtros seleccionados.
-            </div>
-          )}
+          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <SectionTitle
+              title="Reservas filtradas"
+              description={filters.fecha ? `Vista del día ${filters.fecha}` : "Ordenadas por fecha y turno."}
+              action={
+                <span className="rounded-md bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-700">
+                  {filteredReservas.length}
+                </span>
+              }
+            />
 
-          {filteredReservas.map((reserva) => {
-            const canConfirm = reserva.estado === "pendiente_pago";
-            const canCancel = ["pendiente_pago", "confirmada"].includes(reserva.estado);
-            const canEdit = activeReservaStates.includes(reserva.estado);
-            const isUpdating = updatingReservaId === reserva.id;
+            {filteredReservas.length === 0 ? (
+              <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-6 text-slate-600">
+                No hay reservas para los filtros seleccionados.
+              </div>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {filteredReservas.map((reserva) => {
+                  const canConfirm = reserva.estado === "pendiente_pago";
+                  const canCancel = ["pendiente_pago", "confirmada"].includes(reserva.estado);
+                  const canEdit = activeReservaStates.includes(reserva.estado);
+                  const isUpdating = updatingReservaId === reserva.id;
 
-            return (
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={reserva.id}>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 className="font-bold text-slate-950">{reserva.Cancha?.nombre || "Cancha"}</h3>
-                    <p className="text-sm text-slate-600">
-                      {getClientLabel(reserva.User)} · {reserva.User?.email || "Sin email"}
-                    </p>
-                    <p className="text-sm text-slate-600">
-                      {formatReservaDate(reserva.fecha)} · {momentoLabels[reserva.momento]}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-700">
-                      {estadoLabels[reserva.estado]} · {formatPrice(reserva.precioFinal)}
-                    </p>
-                  </div>
+                  return (
+                    <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={reserva.id}>
+                      <div className="grid gap-3 xl:grid-cols-[1.1fr_1fr_auto] xl:items-center">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-black text-slate-950">{reserva.Cancha?.nombre || "Cancha"}</h3>
+                            <EstadoBadge estado={reserva.estado} />
+                          </div>
+                          <p className="mt-1 text-sm text-slate-600">
+                            {getClientLabel(reserva.User)} · {reserva.User?.email || "Sin email"}
+                          </p>
+                        </div>
 
-                  <div className="flex items-center gap-2">
-                    {canEdit && (
-                      <button
-                        className="rounded-md border border-slate-300 p-2 text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
-                        type="button"
-                        onClick={() => handleEditReserva(reserva)}
-                        disabled={isUpdating}
-                        title="Editar reserva"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                    )}
-                    {canConfirm && (
-                      <button
-                        className="rounded-md border border-emerald-200 p-2 text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
-                        type="button"
-                        onClick={() => handleConfirmReserva(reserva.id)}
-                        disabled={isUpdating}
-                        title="Confirmar reserva"
-                      >
-                        <Check className="h-4 w-4" />
-                      </button>
-                    )}
-                    {canCancel && (
-                      <button
-                        className="rounded-md border border-red-200 p-2 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                        type="button"
-                        onClick={() => handleCancelReserva(reserva.id)}
-                        disabled={isUpdating}
-                        title="Cancelar reserva"
-                      >
-                        <Ban className="h-4 w-4" />
-                      </button>
-                    )}
-                    {!canConfirm && !canCancel && (
-                      <span className="rounded-md border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500">
-                        Sin acciones
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+                        <div className="grid gap-2 text-sm text-slate-600 xl:grid-cols-2">
+                          <span className="rounded-md bg-white px-3 py-2 ring-1 ring-slate-200">
+                            {formatReservaDate(reserva.fecha)} · {momentoLabels[reserva.momento]}
+                          </span>
+                          <span className="rounded-md bg-white px-3 py-2 font-bold text-slate-800 ring-1 ring-slate-200">
+                            {formatPrice(reserva.precioFinal)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2">
+                          {canEdit && (
+                            <button
+                              className="rounded-md border border-slate-300 bg-white p-2 text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                              type="button"
+                              onClick={() => handleEditReserva(reserva)}
+                              disabled={isUpdating}
+                              title="Editar reserva"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          )}
+                          {canConfirm && (
+                            <button
+                              className="rounded-md border border-emerald-200 bg-white p-2 text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                              type="button"
+                              onClick={() => handleConfirmReserva(reserva.id)}
+                              disabled={isUpdating}
+                              title="Confirmar reserva"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                          )}
+                          {canCancel && (
+                            <button
+                              className="rounded-md border border-red-200 bg-white p-2 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+                              type="button"
+                              onClick={() => handleCancelReserva(reserva.id)}
+                              disabled={isUpdating}
+                              title="Cancelar reserva"
+                            >
+                              <Ban className="h-4 w-4" />
+                            </button>
+                          )}
+                          {!canConfirm && !canCancel && (
+                            <span className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
+                              Sin acciones
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </section>

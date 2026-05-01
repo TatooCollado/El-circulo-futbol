@@ -525,6 +525,12 @@ GET /api/reportes/general?fechaDesde=YYYY-MM-DD&fechaHasta=YYYY-MM-DD
 
 ## Deploy sugerido
 
+Hay una guia paso a paso en:
+
+```txt
+docs/deploy.md
+```
+
 Base de datos:
 
 - Neon PostgreSQL.
@@ -535,6 +541,8 @@ Backend:
 - Root directory: `backend`.
 - Build command: `npm install`.
 - Start command: `npm start`.
+- Health check path: `/api/health`.
+- El archivo `render.yaml` deja preparada una configuracion base para crear el servicio desde el repositorio.
 - Variables necesarias:
 
 ```txt
