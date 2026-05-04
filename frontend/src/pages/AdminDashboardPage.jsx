@@ -659,7 +659,7 @@ export const AdminDashboardPage = () => {
     <section className="space-y-6">
       {(error || success) && (
         <div
-          className={`fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-2rem))] rounded-lg border p-4 text-sm shadow-xl ${
+          className={`fixed left-1/2 top-1/2 z-50 w-[min(420px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border p-4 text-sm shadow-xl ${
             error
               ? "border-red-200 bg-red-50 text-red-800"
               : "border-emerald-200 bg-emerald-50 text-emerald-800"
