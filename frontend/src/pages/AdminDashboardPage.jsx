@@ -9,6 +9,7 @@ import {
   DollarSign,
   Eye,
   EyeOff,
+  Loader2,
   Map as MapIcon,
   Pencil,
   Plus,
@@ -656,6 +657,39 @@ export const AdminDashboardPage = () => {
 
   return (
     <section className="space-y-6">
+      {(error || success) && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-2rem))] rounded-lg border p-4 text-sm shadow-xl ${
+            error
+              ? "border-red-200 bg-red-50 text-red-800"
+              : "border-emerald-200 bg-emerald-50 text-emerald-800"
+          }`}
+          role="alert"
+        >
+          <div className="flex items-start gap-3">
+            <span
+              className={`mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
+                error ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"
+              }`}
+            >
+              {error ? <Ban className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+            </span>
+            <p className="min-w-0 flex-1 font-semibold leading-6">{error || success}</p>
+            <button
+              className="rounded-md p-1 text-current opacity-70 transition hover:bg-white/70 hover:opacity-100"
+              type="button"
+              onClick={() => {
+                setError("");
+                setSuccess("");
+              }}
+              title="Cerrar aviso"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="inline-flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
@@ -670,18 +704,6 @@ export const AdminDashboardPage = () => {
           <p className="mt-1 text-2xl font-black text-slate-950">{reservasHoy.length}</p>
         </div>
       </div>
-
-      {(error || success) && (
-        <div
-          className={`rounded-md border p-4 text-sm ${
-            error
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
-          }`}
-        >
-          {error || success}
-        </div>
-      )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -1034,47 +1056,56 @@ export const AdminDashboardPage = () => {
               }
             />
             <div className="mt-4 max-h-[430px] space-y-3 overflow-auto pr-1">
-            {canchas.map((cancha) => {
-              const isDeletingCancha = deletingCanchaId === cancha.id;
+              {canchas.map((cancha) => {
+                const isDeletingCancha = deletingCanchaId === cancha.id;
 
-              return (
-              <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={cancha.id}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-black text-slate-950">{cancha.nombre}</h3>
-                      <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-slate-700 ring-1 ring-slate-200">
-                        {canchaTypeLabels[cancha.tipo] || cancha.tipo}
-                      </span>
+                return (
+                  <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={cancha.id}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-black text-slate-950">{cancha.nombre}</h3>
+                          <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-slate-700 ring-1 ring-slate-200">
+                            {canchaTypeLabels[cancha.tipo] || cancha.tipo}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-lg font-black text-slate-950">{formatPrice(cancha.precio)}</p>
+                        <p
+                          className={`mt-1 text-sm font-semibold ${
+                            cancha.disponible ? "text-emerald-700" : "text-red-700"
+                          }`}
+                        >
+                          {cancha.disponible ? "Disponible" : "No disponible"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          className="rounded-md border border-slate-300 p-2 text-slate-700 transition hover:bg-slate-100"
+                          type="button"
+                          onClick={() => handleEditCancha(cancha)}
+                          title="Editar cancha"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          className="rounded-md border border-red-200 p-2 text-red-700 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
+                          type="button"
+                          onClick={() => handleDeleteCancha(cancha.id)}
+                          disabled={isDeletingCancha}
+                          title={isDeletingCancha ? "Eliminando cancha" : "Eliminar cancha"}
+                          aria-label={isDeletingCancha ? "Eliminando cancha" : "Eliminar cancha"}
+                        >
+                          {isDeletingCancha ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
-                    <p className="mt-2 text-lg font-black text-slate-950">{formatPrice(cancha.precio)}</p>
-                    <p className={`mt-1 text-sm font-semibold ${cancha.disponible ? "text-emerald-700" : "text-red-700"}`}>
-                      {cancha.disponible ? "Disponible" : "No disponible"}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      className="rounded-md border border-slate-300 p-2 text-slate-700 transition hover:bg-slate-100"
-                      type="button"
-                      onClick={() => handleEditCancha(cancha)}
-                      title="Editar cancha"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      className="rounded-md border border-red-200 p-2 text-red-700 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
-                      type="button"
-                      onClick={() => handleDeleteCancha(cancha.id)}
-                      disabled={isDeletingCancha}
-                      title="Eliminar cancha"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </article>
-              );
-            })}
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
