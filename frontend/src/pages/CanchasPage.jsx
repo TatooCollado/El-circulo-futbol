@@ -62,20 +62,20 @@ export const CanchasPage = () => {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="inline-flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
-            <Sparkles className="h-4 w-4" />
+          <p className="inline-flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:text-sm">
+            <Sparkles className="h-4 w-4 shrink-0" />
             Disponibilidad del complejo
           </p>
-          <h1 className="mt-3 text-4xl font-black text-slate-950">Canchas</h1>
-          <p className="mt-2 text-slate-600">
+          <h1 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">Canchas</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
             Elegí una cancha disponible y reservá por mañana, tarde o noche.
           </p>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-right shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Turnos disponibles</p>
-          <p className="mt-1 text-2xl font-black text-slate-950">3 por día</p>
+        <div className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-left shadow-sm sm:block sm:w-auto sm:text-right">
+          <p className="whitespace-nowrap text-xs font-medium text-slate-500 sm:text-sm">Turnos disponibles</p>
+          <p className="whitespace-nowrap text-xl font-black text-slate-950 sm:mt-1 sm:text-2xl">3 por día</p>
         </div>
       </div>
 
