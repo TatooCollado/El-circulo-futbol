@@ -499,7 +499,7 @@ export const AdminDashboardPage = () => {
     const precio = Number(form.precio);
 
     if (!Number.isFinite(precio) || precio <= 0) {
-      setError("El precio de la cancha debe ser mayor a $ 0.");
+      setError("El valor debe ser mayor a 0.");
       return;
     }
 
@@ -753,10 +753,8 @@ export const AdminDashboardPage = () => {
                   <span className="text-sm font-medium text-slate-700">Precio</span>
                   <input
                     className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-                    min="1"
+                    inputMode="numeric"
                     name="precio"
-                    required
-                    step="1"
                     type="number"
                     value={form.precio}
                     onChange={handleFormChange}

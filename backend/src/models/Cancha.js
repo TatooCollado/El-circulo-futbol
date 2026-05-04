@@ -29,7 +29,7 @@ export const defineCanchaModel = (sequelize) => {
             const precio = Number(value);
 
             if (!Number.isFinite(precio) || precio <= 0) {
-              throw new Error("El precio debe ser mayor a 0");
+              throw new Error("El valor debe ser mayor a 0");
             }
           }
         }

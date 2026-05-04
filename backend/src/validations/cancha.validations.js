@@ -62,7 +62,7 @@ export const canchaValidation = [
     .notEmpty()
     .withMessage("El precio es obligatorio")
     .isFloat({ gt: 0 })
-    .withMessage("El precio debe ser un numero mayor a 0"),
+    .withMessage("El valor debe ser mayor a 0"),
   body("disponible")
     .optional()
     .isBoolean()
