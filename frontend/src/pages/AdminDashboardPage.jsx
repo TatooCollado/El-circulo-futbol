@@ -1405,7 +1405,7 @@ export const AdminDashboardPage = () => {
                           <span className="rounded-md bg-white px-3 py-2 ring-1 ring-slate-200">
                             {formatReservaDate(reserva.fecha)} · {momentoLabels[reserva.momento]}
                           </span>
-                          <span className="rounded-md bg-white px-3 py-2 font-bold text-slate-800 ring-1 ring-slate-200">
+                          <span className="rounded-md bg-white px-3 py-2 text-center font-bold tabular-nums text-slate-800 ring-1 ring-slate-200">
                             {formatPrice(reserva.precioFinal)}
                           </span>
                         </div>
