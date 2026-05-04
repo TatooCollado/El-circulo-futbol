@@ -1,6 +1,6 @@
 import { CalendarDays, MapPin, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { canchaService } from "../services/canchaService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
@@ -41,6 +41,7 @@ const CanchaArtwork = ({ nombre, tipo }) => (
 
 export const CanchasPage = () => {
   const { isAuthenticated, rol } = useAuth();
+  const navigate = useNavigate();
   const [canchas, setCanchas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -59,6 +60,25 @@ export const CanchasPage = () => {
 
     loadCanchas();
   }, []);
+
+  const canReserve = !isAuthenticated || rol === "cliente";
+
+  const handleCardClick = (canchaId) => {
+    if (canReserve) {
+      navigate(`/reservar/${canchaId}`);
+    }
+  };
+
+  const handleCardKeyDown = (event, canchaId) => {
+    if (!canReserve) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      navigate(`/reservar/${canchaId}`);
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -100,8 +120,16 @@ export const CanchasPage = () => {
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {canchas.map((cancha) => (
           <article
-            className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg hover:shadow-slate-900/10"
+            className={`group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition ${
+              canReserve
+                ? "cursor-pointer hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg hover:shadow-slate-900/10 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                : ""
+            }`}
             key={cancha.id}
+            role={canReserve ? "link" : undefined}
+            tabIndex={canReserve ? 0 : undefined}
+            onClick={() => handleCardClick(cancha.id)}
+            onKeyDown={(event) => handleCardKeyDown(event, cancha.id)}
           >
             <CanchaArtwork nombre={cancha.nombre} tipo={cancha.tipo} />
             <div className="space-y-4 p-5">
@@ -131,6 +159,7 @@ export const CanchasPage = () => {
                   <Link
                     className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-900/20 transition hover:bg-emerald-700"
                     to={`/reservar/${cancha.id}`}
+                    onClick={(event) => event.stopPropagation()}
                   >
                     <CalendarDays className="h-4 w-4" />
                     Reservar
