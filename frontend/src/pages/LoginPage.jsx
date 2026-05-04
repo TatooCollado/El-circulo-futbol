@@ -21,8 +21,8 @@ export const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const [form, setForm] = useState({
-    email: "superadmin@demo.com",
-    password: "Demo1234"
+    email: "",
+    password: ""
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
