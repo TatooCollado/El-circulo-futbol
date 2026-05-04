@@ -224,6 +224,7 @@ export const AdminDashboardPage = () => {
   const [isSubmittingReserva, setIsSubmittingReserva] = useState(false);
   const [isSubmittingCliente, setIsSubmittingCliente] = useState(false);
   const [updatingReservaId, setUpdatingReservaId] = useState(null);
+  const [deletingCanchaId, setDeletingCanchaId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -599,11 +600,14 @@ export const AdminDashboardPage = () => {
     setSuccess("");
 
     try {
-      await canchaService.deleteCancha(canchaId);
-      setSuccess("Cancha dada de baja correctamente.");
+      setDeletingCanchaId(canchaId);
+      const data = await canchaService.deleteCancha(canchaId);
+      setSuccess(data.message || "Cancha eliminada correctamente.");
       await loadAdminData();
     } catch (deleteError) {
       setError(getApiErrorMessage(deleteError));
+    } finally {
+      setDeletingCanchaId(null);
     }
   };
 
@@ -1030,7 +1034,10 @@ export const AdminDashboardPage = () => {
               }
             />
             <div className="mt-4 max-h-[430px] space-y-3 overflow-auto pr-1">
-            {canchas.map((cancha) => (
+            {canchas.map((cancha) => {
+              const isDeletingCancha = deletingCanchaId === cancha.id;
+
+              return (
               <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={cancha.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -1055,18 +1062,19 @@ export const AdminDashboardPage = () => {
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
-                      className="rounded-md border border-red-200 p-2 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+                      className="rounded-md border border-red-200 p-2 text-red-700 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
                       type="button"
                       onClick={() => handleDeleteCancha(cancha.id)}
-                      disabled={!cancha.disponible}
-                      title="Dar de baja cancha"
+                      disabled={isDeletingCancha}
+                      title="Eliminar cancha"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
               </article>
-            ))}
+              );
+            })}
             </div>
           </div>
         </section>

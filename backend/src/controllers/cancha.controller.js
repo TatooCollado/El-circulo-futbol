@@ -141,13 +141,28 @@ export const deleteCancha = async (req, res, next) => {
     });
 
     if (activeReserva) {
-      throw httpError(409, "No se puede dar de baja una cancha con reservas activas");
+      throw httpError(409, "No se puede eliminar una cancha con reservas activas");
+    }
+
+    const reservasCount = await Reserva.count({
+      where: {
+        canchaId: cancha.id
+      }
+    });
+
+    if (reservasCount === 0) {
+      await cancha.destroy();
+
+      return res.json({
+        message: "Cancha eliminada correctamente",
+        canchaId: Number(req.params.id)
+      });
     }
 
     await cancha.update({ disponible: false });
 
     return res.json({
-      message: "Cancha dada de baja correctamente",
+      message: "Cancha dada de baja correctamente. Se conserva por tener reservas historicas.",
       cancha
     });
   } catch (error) {
