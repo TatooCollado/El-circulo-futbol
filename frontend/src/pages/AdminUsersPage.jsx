@@ -1,4 +1,4 @@
-import { CalendarDays, Mail, Plus, Search, UserPlus, Users } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Mail, Plus, Search, UserPlus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { userService } from "../services/userService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
@@ -9,6 +9,8 @@ const emptyClienteForm = {
   email: "",
   password: ""
 };
+
+const USERS_PAGE_SIZE = 8;
 
 const normalizeText = (value) => {
   return String(value ?? "")
@@ -29,10 +31,28 @@ const formatDate = (value) => {
   });
 };
 
+const getPagination = (items, page) => {
+  const totalItems = items.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / USERS_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * USERS_PAGE_SIZE;
+  const endIndex = Math.min(startIndex + USERS_PAGE_SIZE, totalItems);
+
+  return {
+    currentPage,
+    endIndex,
+    items: items.slice(startIndex, endIndex),
+    startIndex,
+    totalItems,
+    totalPages
+  };
+};
+
 export const AdminUsersPage = () => {
   const [clientes, setClientes] = useState([]);
   const [form, setForm] = useState(emptyClienteForm);
   const [search, setSearch] = useState("");
+  const [clientesPage, setClientesPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -50,6 +70,11 @@ export const AdminUsersPage = () => {
       return searchable.includes(searchValue);
     });
   }, [clientes, search]);
+
+  const clientesPagination = useMemo(
+    () => getPagination(filteredClientes, clientesPage),
+    [clientesPage, filteredClientes]
+  );
 
   const loadClientes = async () => {
     const data = await userService.getClientes();
@@ -69,6 +94,25 @@ export const AdminUsersPage = () => {
 
     load();
   }, []);
+
+  useEffect(() => {
+    setClientesPage((currentPage) => {
+      const totalPages = Math.max(1, Math.ceil(filteredClientes.length / USERS_PAGE_SIZE));
+      return Math.min(currentPage, totalPages);
+    });
+  }, [filteredClientes.length]);
+
+  const handleSearchChange = (event) => {
+    setClientesPage(1);
+    setSearch(event.target.value);
+  };
+
+  const handleClientesPageChange = (offset) => {
+    setClientesPage((currentPage) => {
+      const nextPage = currentPage + offset;
+      return Math.min(Math.max(nextPage, 1), clientesPagination.totalPages);
+    });
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -232,7 +276,7 @@ export const AdminUsersPage = () => {
                 className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                 placeholder="Buscar cliente o email"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={handleSearchChange}
               />
             </label>
           </div>
@@ -243,7 +287,43 @@ export const AdminUsersPage = () => {
             </div>
           )}
 
-          {filteredClientes.map((cliente) => (
+          {filteredClientes.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600">
+              <span>
+                Mostrando {clientesPagination.startIndex + 1}-{clientesPagination.endIndex} de{" "}
+                {clientesPagination.totalItems}
+              </span>
+              {clientesPagination.totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                    type="button"
+                    onClick={() => handleClientesPageChange(-1)}
+                    disabled={clientesPagination.currentPage === 1}
+                    title="Página anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Anterior
+                  </button>
+                  <span className="rounded-md bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 ring-1 ring-slate-200">
+                    {clientesPagination.currentPage} / {clientesPagination.totalPages}
+                  </span>
+                  <button
+                    className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                    type="button"
+                    onClick={() => handleClientesPageChange(1)}
+                    disabled={clientesPagination.currentPage === clientesPagination.totalPages}
+                    title="Página siguiente"
+                  >
+                    Siguiente
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {clientesPagination.items.map((cliente) => (
             <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={cliente.id}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>

@@ -1,9 +1,11 @@
+import { literal } from "sequelize";
 import { User } from "../models/index.js";
 import { hashPassword } from "../services/auth.service.js";
 import { httpError } from "../utils/httpError.js";
 import { sanitizeUser } from "../utils/sanitizeUser.js";
 
 const normalizeEmail = (email) => email.toLowerCase().trim();
+const roleOrder = literal("CASE rol WHEN 'super_admin' THEN 1 WHEN 'admin' THEN 2 WHEN 'cliente' THEN 3 ELSE 4 END");
 
 export const getUsers = async (req, res, next) => {
   try {
@@ -11,7 +13,13 @@ export const getUsers = async (req, res, next) => {
     const where = includeInactive ? {} : { activo: true };
     const users = await User.findAll({
       where,
-      order: [["id", "ASC"]]
+      order: [
+        ["activo", "DESC"],
+        [roleOrder, "ASC"],
+        ["apellido", "ASC"],
+        ["nombre", "ASC"],
+        ["id", "ASC"]
+      ]
     });
 
     return res.json({ users: users.map(sanitizeUser) });
@@ -29,8 +37,10 @@ export const getClientes = async (req, res, next) => {
       },
       attributes: ["id", "nombre", "apellido", "email", "activo", "createdAt"],
       order: [
+        ["activo", "DESC"],
         ["apellido", "ASC"],
-        ["nombre", "ASC"]
+        ["nombre", "ASC"],
+        ["id", "ASC"]
       ]
     });
 

@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash2, UserCog } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2, UserCog } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { userService } from "../services/userService.js";
@@ -19,12 +19,38 @@ const roleLabels = {
   super_admin: "Super admin"
 };
 
+const rolePriority = {
+  super_admin: 1,
+  admin: 2,
+  cliente: 3
+};
+
+const USERS_PAGE_SIZE = 8;
+
+const getPagination = (items, page) => {
+  const totalItems = items.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / USERS_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * USERS_PAGE_SIZE;
+  const endIndex = Math.min(startIndex + USERS_PAGE_SIZE, totalItems);
+
+  return {
+    currentPage,
+    endIndex,
+    items: items.slice(startIndex, endIndex),
+    startIndex,
+    totalItems,
+    totalPages
+  };
+};
+
 export const SuperAdminUsersPage = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState(emptyUserForm);
   const [editingUserId, setEditingUserId] = useState(null);
   const [filters, setFilters] = useState({ rol: "", estado: "" });
+  const [usersPage, setUsersPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -37,18 +63,36 @@ export const SuperAdminUsersPage = () => {
   );
   const isEditingSelf = editingUserId === currentUser?.id;
   const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      const matchesRol = filters.rol ? user.rol === filters.rol : true;
-      const matchesEstado =
-        filters.estado === "activo"
-          ? user.activo
-          : filters.estado === "inactivo"
-            ? !user.activo
-            : true;
+    return users
+      .filter((user) => {
+        const matchesRol = filters.rol ? user.rol === filters.rol : true;
+        const matchesEstado =
+          filters.estado === "activo"
+            ? user.activo
+            : filters.estado === "inactivo"
+              ? !user.activo
+              : true;
 
-      return matchesRol && matchesEstado;
-    });
+        return matchesRol && matchesEstado;
+      })
+      .sort((a, b) => {
+        if (a.activo !== b.activo) {
+          return a.activo ? -1 : 1;
+        }
+
+        return (
+          (rolePriority[a.rol] || 4) - (rolePriority[b.rol] || 4) ||
+          a.apellido.localeCompare(b.apellido) ||
+          a.nombre.localeCompare(b.nombre) ||
+          a.id - b.id
+        );
+      });
   }, [filters, users]);
+
+  const usersPagination = useMemo(
+    () => getPagination(filteredUsers, usersPage),
+    [filteredUsers, usersPage]
+  );
 
   const loadUsers = async () => {
     const data = await userService.getUsers({ incluirInactivos: true });
@@ -69,6 +113,13 @@ export const SuperAdminUsersPage = () => {
     load();
   }, []);
 
+  useEffect(() => {
+    setUsersPage((currentPage) => {
+      const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PAGE_SIZE));
+      return Math.min(currentPage, totalPages);
+    });
+  }, [filteredUsers.length]);
+
   const resetForm = () => {
     setForm(emptyUserForm);
     setEditingUserId(null);
@@ -84,7 +135,15 @@ export const SuperAdminUsersPage = () => {
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
+    setUsersPage(1);
     setFilters((currentFilters) => ({ ...currentFilters, [name]: value }));
+  };
+
+  const handleUsersPageChange = (offset) => {
+    setUsersPage((currentPage) => {
+      const nextPage = currentPage + offset;
+      return Math.min(Math.max(nextPage, 1), usersPagination.totalPages);
+    });
   };
 
   const handleEdit = (user) => {
@@ -338,7 +397,43 @@ export const SuperAdminUsersPage = () => {
             </div>
           )}
 
-          {filteredUsers.map((user) => (
+          {filteredUsers.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600">
+              <span>
+                Mostrando {usersPagination.startIndex + 1}-{usersPagination.endIndex} de{" "}
+                {usersPagination.totalItems}
+              </span>
+              {usersPagination.totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                    type="button"
+                    onClick={() => handleUsersPageChange(-1)}
+                    disabled={usersPagination.currentPage === 1}
+                    title="Página anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Anterior
+                  </button>
+                  <span className="rounded-md bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 ring-1 ring-slate-200">
+                    {usersPagination.currentPage} / {usersPagination.totalPages}
+                  </span>
+                  <button
+                    className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                    type="button"
+                    onClick={() => handleUsersPageChange(1)}
+                    disabled={usersPagination.currentPage === usersPagination.totalPages}
+                    title="Página siguiente"
+                  >
+                    Siguiente
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {usersPagination.items.map((user) => (
             <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={user.id}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
