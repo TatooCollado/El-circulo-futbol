@@ -1,4 +1,4 @@
-import { Ban, CalendarDays, CheckCircle2, CreditCard, History, X } from "lucide-react";
+import { Ban, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CreditCard, History, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { pagoService } from "../services/pagoService.js";
 import { reservaService } from "../services/reservaService.js";
@@ -48,6 +48,8 @@ const pagoStyles = {
 };
 
 const activeStates = ["pendiente_pago", "confirmada"];
+const RESERVAS_PAGE_SIZE = 5;
+
 const statusPriority = {
   pendiente_pago: 1,
   confirmada: 2,
@@ -83,6 +85,23 @@ const getReservaSortValue = (reserva) => {
 };
 
 const canCancelReserva = (estado) => activeStates.includes(estado);
+
+const getReservasPagination = (reservas, page) => {
+  const totalItems = reservas.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / RESERVAS_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * RESERVAS_PAGE_SIZE;
+  const endIndex = Math.min(startIndex + RESERVAS_PAGE_SIZE, totalItems);
+
+  return {
+    currentPage,
+    endIndex,
+    items: reservas.slice(startIndex, endIndex),
+    startIndex,
+    totalItems,
+    totalPages
+  };
+};
 
 const ReservaCard = ({
   reserva,
@@ -172,49 +191,91 @@ const ReservaSection = ({
   title,
   description,
   icon: Icon,
-  reservas,
+  pagination,
   emptyMessage,
   cancellingId,
   processingPagoId,
   onCancelReserva,
+  onPageChange,
   onSimulatePago
-}) => (
-  <section className="space-y-3">
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-emerald-700" />
-        <div>
-          <h2 className="text-xl font-bold">{title}</h2>
-          <p className="text-sm text-slate-500">{description}</p>
-        </div>
-      </div>
-      <span className="rounded-md bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-700">
-        {reservas.length}
-      </span>
-    </div>
+}) => {
+  const hasPagination = pagination.totalPages > 1;
 
-    {reservas.length === 0 ? (
-      <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">{emptyMessage}</div>
-    ) : (
-      reservas.map((reserva) => (
-        <ReservaCard
-          key={reserva.id}
-          reserva={reserva}
-          cancellingId={cancellingId}
-          processingPagoId={processingPagoId}
-          onCancelReserva={onCancelReserva}
-          onSimulatePago={onSimulatePago}
-        />
-      ))
-    )}
-  </section>
-);
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5 text-emerald-700" />
+          <div>
+            <h2 className="text-xl font-bold">{title}</h2>
+            <p className="text-sm text-slate-500">{description}</p>
+          </div>
+        </div>
+        <span className="rounded-md bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-700">
+          {pagination.totalItems}
+        </span>
+      </div>
+
+      {pagination.totalItems === 0 ? (
+        <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">{emptyMessage}</div>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600">
+            <span>
+              Mostrando {pagination.startIndex + 1}-{pagination.endIndex} de {pagination.totalItems}
+            </span>
+            {hasPagination && (
+              <div className="flex items-center gap-2">
+                <button
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                  type="button"
+                  onClick={() => onPageChange(-1)}
+                  disabled={pagination.currentPage === 1}
+                  title="Página anterior"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </button>
+                <span className="rounded-md bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 ring-1 ring-slate-200">
+                  {pagination.currentPage} / {pagination.totalPages}
+                </span>
+                <button
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                  type="button"
+                  onClick={() => onPageChange(1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                  title="Página siguiente"
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {pagination.items.map((reserva) => (
+            <ReservaCard
+              key={reserva.id}
+              reserva={reserva}
+              cancellingId={cancellingId}
+              processingPagoId={processingPagoId}
+              onCancelReserva={onCancelReserva}
+              onSimulatePago={onSimulatePago}
+            />
+          ))}
+        </>
+      )}
+    </section>
+  );
+};
 
 export const MisReservasPage = () => {
   const [reservas, setReservas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
   const [processingPagoId, setProcessingPagoId] = useState(null);
+  const [proximasPage, setProximasPage] = useState(1);
+  const [historialPage, setHistorialPage] = useState(1);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -244,6 +305,16 @@ export const MisReservasPage = () => {
     };
   }, [reservas, today]);
 
+  const proximasPagination = useMemo(
+    () => getReservasPagination(proximasReservas, proximasPage),
+    [proximasPage, proximasReservas]
+  );
+
+  const historialPagination = useMemo(
+    () => getReservasPagination(historialReservas, historialPage),
+    [historialPage, historialReservas]
+  );
+
   const loadReservas = async () => {
     const data = await reservaService.getMisReservas();
     setReservas(data.reservas);
@@ -262,6 +333,34 @@ export const MisReservasPage = () => {
 
     load();
   }, []);
+
+  useEffect(() => {
+    setProximasPage((currentPage) => {
+      const totalPages = Math.max(1, Math.ceil(proximasReservas.length / RESERVAS_PAGE_SIZE));
+      return Math.min(currentPage, totalPages);
+    });
+  }, [proximasReservas.length]);
+
+  useEffect(() => {
+    setHistorialPage((currentPage) => {
+      const totalPages = Math.max(1, Math.ceil(historialReservas.length / RESERVAS_PAGE_SIZE));
+      return Math.min(currentPage, totalPages);
+    });
+  }, [historialReservas.length]);
+
+  const handleProximasPageChange = (offset) => {
+    setProximasPage((currentPage) => {
+      const nextPage = currentPage + offset;
+      return Math.min(Math.max(nextPage, 1), proximasPagination.totalPages);
+    });
+  };
+
+  const handleHistorialPageChange = (offset) => {
+    setHistorialPage((currentPage) => {
+      const nextPage = currentPage + offset;
+      return Math.min(Math.max(nextPage, 1), historialPagination.totalPages);
+    });
+  };
 
   const handleCancelReserva = async (reservaId) => {
     setError("");
@@ -336,11 +435,12 @@ export const MisReservasPage = () => {
             title="Próximas reservas"
             description="Turnos activos desde hoy en adelante."
             icon={CheckCircle2}
-            reservas={proximasReservas}
+            pagination={proximasPagination}
             emptyMessage="No tenés reservas activas próximas."
             cancellingId={cancellingId}
             processingPagoId={processingPagoId}
             onCancelReserva={handleCancelReserva}
+            onPageChange={handleProximasPageChange}
             onSimulatePago={handleSimulatePago}
           />
 
@@ -348,11 +448,12 @@ export const MisReservasPage = () => {
             title="Historial"
             description="Reservas pasadas, canceladas, vencidas o rechazadas."
             icon={History}
-            reservas={historialReservas}
+            pagination={historialPagination}
             emptyMessage="Todavía no hay reservas en el historial."
             cancellingId={cancellingId}
             processingPagoId={processingPagoId}
             onCancelReserva={handleCancelReserva}
+            onPageChange={handleHistorialPageChange}
             onSimulatePago={handleSimulatePago}
           />
         </div>
