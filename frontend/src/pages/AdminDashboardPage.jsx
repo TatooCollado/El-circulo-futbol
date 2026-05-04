@@ -1081,11 +1081,11 @@ export const AdminDashboardPage = () => {
               }
             />
 
-            <div className="mt-4 grid gap-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+            <div className="mt-4 grid gap-2 md:grid-cols-2 2xl:grid-cols-[1.4fr_1fr_1fr_1fr]">
               <label className="relative block">
                 <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <input
-                  className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full min-w-0 rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                   name="busqueda"
                   placeholder="Buscar cliente, email, cancha..."
                   value={filters.busqueda}
@@ -1093,7 +1093,7 @@ export const AdminDashboardPage = () => {
                 />
               </label>
               <select
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                 name="estado"
                 value={filters.estado}
                 onChange={handleFilterChange}
@@ -1106,7 +1106,7 @@ export const AdminDashboardPage = () => {
                 ))}
               </select>
               <select
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                 name="canchaId"
                 value={filters.canchaId}
                 onChange={handleFilterChange}
@@ -1119,7 +1119,7 @@ export const AdminDashboardPage = () => {
                 ))}
               </select>
               <input
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                 name="fecha"
                 type="date"
                 value={filters.fecha}
