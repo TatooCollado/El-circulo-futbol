@@ -62,6 +62,7 @@ export const CanchasPage = () => {
   }, []);
 
   const canReserve = !isAuthenticated || rol === "cliente";
+  const isAdminPreview = rol === "admin" || rol === "super_admin";
 
   const handleCardClick = (canchaId) => {
     if (canReserve) {
@@ -115,6 +116,24 @@ export const CanchasPage = () => {
         <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-600 shadow-sm">
           No hay canchas disponibles por el momento.
         </div>
+      )}
+
+      {isAdminPreview && (
+        <section className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-bold text-emerald-900">Vista cliente</p>
+            <p className="mt-1 text-sm text-emerald-800">
+              Estás viendo la carta como la ve un cliente. La edición de canchas se gestiona desde el panel admin.
+            </p>
+          </div>
+          <Link
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            to="/admin"
+          >
+            <Sparkles className="h-4 w-4" />
+            Gestionar canchas
+          </Link>
+        </section>
       )}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

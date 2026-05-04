@@ -10,6 +10,8 @@ const getNavItems = (user) => {
     return publicItems;
   }
 
+  const canchasPreviewItem = { to: "/canchas", label: "Vista cliente" };
+
   if (user.rol === "cliente") {
     return [
       ...publicItems,
@@ -19,7 +21,7 @@ const getNavItems = (user) => {
 
   if (user.rol === "admin") {
     return [
-      ...publicItems,
+      canchasPreviewItem,
       { to: "/admin", label: "Admin" },
       { to: "/admin/usuarios", label: "Usuarios" },
       { to: "/admin/reportes", label: "Reportes" }
@@ -28,7 +30,7 @@ const getNavItems = (user) => {
 
   if (user.rol === "super_admin") {
     return [
-      ...publicItems,
+      canchasPreviewItem,
       { to: "/admin", label: "Admin" },
       { to: "/super-admin/usuarios", label: "Usuarios" },
       { to: "/admin/reportes", label: "Reportes" }
