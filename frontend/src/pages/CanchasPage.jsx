@@ -153,12 +153,7 @@ export const CanchasPage = () => {
             <CanchaArtwork nombre={cancha.nombre} tipo={cancha.tipo} />
             <div className="space-y-4 p-5">
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-xl font-black text-slate-950">{cancha.nombre}</h2>
-                  <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
-                    Disponible
-                  </span>
-                </div>
+                <h2 className="text-xl font-black text-slate-950">{cancha.nombre}</h2>
                 <p className="line-clamp-2 min-h-10 text-sm leading-5 text-slate-600">
                   {cancha.descripcion || "Cancha lista para reservar en el turno que prefieras."}
                 </p>
