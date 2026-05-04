@@ -2,18 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
-
-const getRedirectPath = (rol) => {
-  if (rol === "super_admin") {
-    return "/super-admin/usuarios";
-  }
-
-  if (rol === "admin") {
-    return "/admin";
-  }
-
-  return "/canchas";
-};
+import { getRedirectAfterLogin } from "../utils/roleNavigation.js";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -45,7 +34,7 @@ export const LoginPage = () => {
     try {
       setIsSubmitting(true);
       const data = await login(form);
-      const redirectTo = location.state?.from || getRedirectPath(data.user.rol);
+      const redirectTo = getRedirectAfterLogin(data.user.rol, location.state?.from);
       navigate(redirectTo, { replace: true });
     } catch (submitError) {
       setError(getApiErrorMessage(submitError));
