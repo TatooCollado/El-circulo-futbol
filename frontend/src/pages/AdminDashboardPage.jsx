@@ -928,8 +928,8 @@ export const AdminDashboardPage = () => {
                 </select>
               </label>
 
-              <div className="grid gap-3 xl:grid-cols-[1fr_0.85fr_1.15fr]">
-                <label className="block">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block sm:col-span-2">
                   <span className="text-sm font-medium text-slate-700">Fecha</span>
                   <input
                     className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
@@ -944,7 +944,7 @@ export const AdminDashboardPage = () => {
                 <label className="block">
                   <span className="text-sm font-medium text-slate-700">Momento</span>
                   <select
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                    className="mt-1 w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                     name="momento"
                     value={reservaForm.momento}
                     onChange={handleReservaFormChange}
@@ -958,7 +958,7 @@ export const AdminDashboardPage = () => {
                 <label className="block">
                   <span className="text-sm font-medium text-slate-700">Estado</span>
                   <select
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                    className="mt-1 w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                     name="estado"
                     value={reservaForm.estado}
                     onChange={handleReservaFormChange}
