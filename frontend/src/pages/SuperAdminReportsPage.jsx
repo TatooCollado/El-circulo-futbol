@@ -238,7 +238,7 @@ export const SuperAdminReportsPage = () => {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={Users} label="Usuarios activos" value={report.resumen.usuariosActivos} tone="slate" />
         <StatCard icon={CalendarDays} label="Canchas disponibles" value={report.resumen.canchasDisponibles} />
-        <StatCard icon={BarChart3} label="Turnos posibles" value={report.resumen.capacidadTurnosPeriodo || "Sin rango"} tone="sky" />
+        <StatCard icon={BarChart3} label="Turnos posibles" value={report.resumen.capacidadTurnosPeriodo ?? "Sin rango"} tone="sky" />
         <StatCard icon={CalendarDays} label="Canchas totales" value={report.resumen.totalCanchas} tone="slate" />
       </div>
 

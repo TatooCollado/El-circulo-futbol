@@ -162,7 +162,7 @@ export const getGeneralReport = async (req, res, next) => {
       })
     ]);
     const diasPeriodo = getInclusiveDays(fechaDesde, fechaHasta);
-    const capacidadTurnosPeriodo = diasPeriodo ? diasPeriodo * totalCanchas * momentos.length : null;
+    const capacidadTurnosPeriodo = diasPeriodo ? diasPeriodo * canchasDisponibles * momentos.length : null;
     const capacidadTurnosPorCancha = diasPeriodo ? diasPeriodo * momentos.length : null;
 
     return res.json({
