@@ -928,7 +928,7 @@ export const AdminDashboardPage = () => {
                 </select>
               </label>
 
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 xl:grid-cols-[1fr_0.85fr_1.15fr]">
                 <label className="block">
                   <span className="text-sm font-medium text-slate-700">Fecha</span>
                   <input
@@ -964,7 +964,7 @@ export const AdminDashboardPage = () => {
                     onChange={handleReservaFormChange}
                   >
                     <option value="confirmada">Confirmada</option>
-                    <option value="pendiente_pago">Pendiente</option>
+                    <option value="pendiente_pago">Pendiente pago</option>
                   </select>
                 </label>
               </div>
@@ -1081,8 +1081,8 @@ export const AdminDashboardPage = () => {
               }
             />
 
-            <div className="mt-4 grid gap-2 md:grid-cols-2 2xl:grid-cols-[1.4fr_1fr_1fr_1fr]">
-              <label className="relative block">
+            <div className="mt-4 grid gap-2 md:grid-cols-3">
+              <label className="relative block md:col-span-3">
                 <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   className="w-full min-w-0 rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
@@ -1098,7 +1098,7 @@ export const AdminDashboardPage = () => {
                 value={filters.estado}
                 onChange={handleFilterChange}
               >
-                <option value="">Todos los estados</option>
+                <option value="">Estados</option>
                 {Object.entries(estadoLabels).map(([estado, label]) => (
                   <option key={estado} value={estado}>
                     {label}
@@ -1111,7 +1111,7 @@ export const AdminDashboardPage = () => {
                 value={filters.canchaId}
                 onChange={handleFilterChange}
               >
-                <option value="">Todas las canchas</option>
+                <option value="">Canchas</option>
                 {canchas.map((cancha) => (
                   <option key={cancha.id} value={cancha.id}>
                     {cancha.nombre}
