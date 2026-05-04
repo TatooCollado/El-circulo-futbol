@@ -610,6 +610,7 @@ Despues de deployar el frontend, actualizar `FRONTEND_URL` en el backend para qu
 - Las contrasenas se guardan hasheadas con bcrypt.
 - Las rutas sensibles requieren JWT.
 - Las rutas administrativas validan rol.
+- En produccion, el backend exige `JWT_SECRET` configurado como variable de entorno.
 - El cliente no puede consultar reservas ajenas.
 - El admin no puede cambiar privilegios de usuarios.
 - El super admin no puede desactivarse ni cambiarse su propio rol desde el panel.

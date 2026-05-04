@@ -39,6 +39,8 @@ JWT_EXPIRES_IN=7d
 FRONTEND_URL=https://tu-front.vercel.app
 ```
 
+En `NODE_ENV=production`, el backend no inicia si falta `JWT_SECRET`. Esto evita que el deploy quede online con el secreto de desarrollo.
+
 Luego probar:
 
 ```txt
