@@ -203,6 +203,7 @@ const EstadoBadge = ({ estado }) => (
 );
 
 export const AdminDashboardPage = () => {
+  const canchaFormRef = useRef(null);
   const reservaFormRef = useRef(null);
   const today = getLocalDateString();
   const [canchas, setCanchas] = useState([]);
@@ -449,6 +450,8 @@ export const AdminDashboardPage = () => {
   };
 
   const handleEditCancha = (cancha) => {
+    setError("");
+    setSuccess("");
     setEditingCanchaId(cancha.id);
     setForm({
       nombre: cancha.nombre,
@@ -456,6 +459,11 @@ export const AdminDashboardPage = () => {
       descripcion: cancha.descripcion || "",
       precio: cancha.precio,
       disponible: cancha.disponible
+    });
+
+    window.requestAnimationFrame(() => {
+      canchaFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      canchaFormRef.current?.focus({ preventScroll: true });
     });
   };
 
@@ -696,7 +704,13 @@ export const AdminDashboardPage = () => {
 
       <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
         <section className="space-y-4 xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div
+            className={`scroll-mt-24 rounded-lg border bg-white p-4 shadow-sm outline-none transition ${
+              editingCanchaId ? "border-emerald-300 ring-2 ring-emerald-100" : "border-slate-200"
+            }`}
+            ref={canchaFormRef}
+            tabIndex={-1}
+          >
             <SectionTitle
               title={editingCanchaId ? "Editar cancha" : "Nueva cancha"}
               description="Administrá disponibilidad, tipo y precio."
