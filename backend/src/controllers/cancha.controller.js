@@ -27,7 +27,10 @@ export const getCanchas = async (req, res, next) => {
     const where = includeInactive ? {} : { disponible: true };
     const canchas = await Cancha.findAll({
       where,
-      order: [["id", "ASC"]]
+      order: [
+        ["disponible", "DESC"],
+        ["id", "ASC"]
+      ]
     });
 
     return res.json({ canchas });
