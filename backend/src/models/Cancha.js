@@ -23,7 +23,16 @@ export const defineCanchaModel = (sequelize) => {
       },
       precio: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
+        validate: {
+          isPositive(value) {
+            const precio = Number(value);
+
+            if (!Number.isFinite(precio) || precio <= 0) {
+              throw new Error("El precio debe ser mayor a 0");
+            }
+          }
+        }
       },
       disponible: {
         type: DataTypes.BOOLEAN,
@@ -42,4 +51,3 @@ export const defineCanchaModel = (sequelize) => {
 
   return Cancha;
 };
-
