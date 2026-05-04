@@ -76,6 +76,7 @@ const momentoOrder = {
 };
 
 const AUTO_REFRESH_INTERVAL_MS = 60000;
+const RESERVAS_PAGE_SIZE = 8;
 
 const weekDays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -228,6 +229,7 @@ export const AdminDashboardPage = () => {
   const [showCancelledGlobal, setShowCancelledGlobal] = useState(false);
   const [showCancelledForSelectedDay, setShowCancelledForSelectedDay] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(getLocalDateString().slice(0, 7));
+  const [reservasPage, setReservasPage] = useState(1);
   const [editingCanchaId, setEditingCanchaId] = useState(null);
   const [showClienteForm, setShowClienteForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -341,6 +343,23 @@ export const AdminDashboardPage = () => {
     });
   }, [filters.fecha, reservasFiltradasBase]);
 
+  const reservasPagination = useMemo(() => {
+    const totalItems = filteredReservas.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / RESERVAS_PAGE_SIZE));
+    const currentPage = Math.min(reservasPage, totalPages);
+    const startIndex = (currentPage - 1) * RESERVAS_PAGE_SIZE;
+    const endIndex = Math.min(startIndex + RESERVAS_PAGE_SIZE, totalItems);
+
+    return {
+      currentPage,
+      endIndex,
+      items: filteredReservas.slice(startIndex, endIndex),
+      startIndex,
+      totalItems,
+      totalPages
+    };
+  }, [filteredReservas, reservasPage]);
+
   const calendarDays = useMemo(
     () => buildCalendarDays(calendarMonth, reservasFiltradasBase),
     [calendarMonth, reservasFiltradasBase]
@@ -421,6 +440,13 @@ export const AdminDashboardPage = () => {
     };
   }, [hasPendingMutation, isLoading, loadAdminData]);
 
+  useEffect(() => {
+    setReservasPage((currentPage) => {
+      const totalPages = Math.max(1, Math.ceil(filteredReservas.length / RESERVAS_PAGE_SIZE));
+      return Math.min(currentPage, totalPages);
+    });
+  }, [filteredReservas.length]);
+
   const handleFormChange = (event) => {
     const { name, value, type, checked } = event.target;
     setForm((currentForm) => ({
@@ -441,6 +467,7 @@ export const AdminDashboardPage = () => {
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
+    setReservasPage(1);
     setFilters((currentFilters) => ({ ...currentFilters, [name]: value }));
 
     if (name === "fecha" && value) {
@@ -469,12 +496,14 @@ export const AdminDashboardPage = () => {
   };
 
   const handleClearFilters = () => {
+    setReservasPage(1);
     setFilters({ estado: "", canchaId: "", fecha: "", busqueda: "" });
     setShowCancelledGlobal(false);
     setShowCancelledForSelectedDay(false);
   };
 
   const handleToggleCancelledGlobal = () => {
+    setReservasPage(1);
     setShowCancelledGlobal((currentValue) => {
       const nextValue = !currentValue;
 
@@ -484,6 +513,11 @@ export const AdminDashboardPage = () => {
 
       return nextValue;
     });
+  };
+
+  const handleToggleCancelledForSelectedDay = () => {
+    setReservasPage(1);
+    setShowCancelledForSelectedDay((currentValue) => !currentValue);
   };
 
   const handleCalendarMonthChange = (offset) => {
@@ -498,10 +532,18 @@ export const AdminDashboardPage = () => {
 
     setShowCancelledGlobal(false);
     setShowCancelledForSelectedDay(false);
+    setReservasPage(1);
     setFilters((currentFilters) => ({
       ...currentFilters,
       fecha: currentFilters.fecha === date ? "" : date
     }));
+  };
+
+  const handleReservasPageChange = (offset) => {
+    setReservasPage((currentPage) => {
+      const nextPage = currentPage + offset;
+      return Math.min(Math.max(nextPage, 1), reservasPagination.totalPages);
+    });
   };
 
   const handleEditCancha = (cancha) => {
@@ -1272,7 +1314,7 @@ export const AdminDashboardPage = () => {
                       : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                   } disabled:opacity-50`}
                   type="button"
-                  onClick={() => setShowCancelledForSelectedDay((currentValue) => !currentValue)}
+                  onClick={handleToggleCancelledForSelectedDay}
                   disabled={selectedDayCancelledCount === 0}
                 >
                   {showCancelledForSelectedDay ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -1385,80 +1427,116 @@ export const AdminDashboardPage = () => {
                 No hay reservas para los filtros seleccionados.
               </div>
             ) : (
-              <div className="mt-4 space-y-3">
-                {filteredReservas.map((reserva) => {
-                  const canConfirm = reserva.estado === "pendiente_pago";
-                  const canCancel = ["pendiente_pago", "confirmada"].includes(reserva.estado);
-                  const canEdit = activeReservaStates.includes(reserva.estado);
-                  const isUpdating = updatingReservaId === reserva.id;
+              <>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                  <span>
+                    Mostrando {reservasPagination.startIndex + 1}-{reservasPagination.endIndex} de{" "}
+                    {reservasPagination.totalItems}
+                  </span>
+                  {reservasPagination.totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                        type="button"
+                        onClick={() => handleReservasPageChange(-1)}
+                        disabled={reservasPagination.currentPage === 1}
+                        title="Página anterior"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Anterior
+                      </button>
+                      <span className="rounded-md bg-white px-3 py-1.5 font-semibold text-slate-700 ring-1 ring-slate-200">
+                        {reservasPagination.currentPage} / {reservasPagination.totalPages}
+                      </span>
+                      <button
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                        type="button"
+                        onClick={() => handleReservasPageChange(1)}
+                        disabled={reservasPagination.currentPage === reservasPagination.totalPages}
+                        title="Página siguiente"
+                      >
+                        Siguiente
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-                  return (
-                    <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={reserva.id}>
-                      <div className="grid gap-3 xl:grid-cols-[1.1fr_1fr_auto] xl:items-center">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-black text-slate-950">{reserva.Cancha?.nombre || "Cancha"}</h3>
-                            <EstadoBadge estado={reserva.estado} />
+                <div className="mt-3 space-y-3">
+                  {reservasPagination.items.map((reserva) => {
+                    const canConfirm = reserva.estado === "pendiente_pago";
+                    const canCancel = ["pendiente_pago", "confirmada"].includes(reserva.estado);
+                    const canEdit = activeReservaStates.includes(reserva.estado);
+                    const isUpdating = updatingReservaId === reserva.id;
+
+                    return (
+                      <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={reserva.id}>
+                        <div className="grid gap-3 xl:grid-cols-[1.1fr_1fr_auto] xl:items-center">
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-black text-slate-950">{reserva.Cancha?.nombre || "Cancha"}</h3>
+                              <EstadoBadge estado={reserva.estado} />
+                            </div>
+                            <p className="mt-1 text-sm text-slate-600">
+                              {getClientLabel(reserva.User)} · {reserva.User?.email || "Sin email"}
+                            </p>
                           </div>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {getClientLabel(reserva.User)} · {reserva.User?.email || "Sin email"}
-                          </p>
-                        </div>
 
-                        <div className="grid gap-2 text-sm text-slate-600 xl:grid-cols-2">
-                          <span className="rounded-md bg-white px-3 py-2 ring-1 ring-slate-200">
-                            {formatReservaDate(reserva.fecha)} · {momentoLabels[reserva.momento]}
-                          </span>
-                          <span className="rounded-md bg-white px-3 py-2 text-center font-bold tabular-nums text-slate-800 ring-1 ring-slate-200">
-                            {formatPrice(reserva.precioFinal)}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-end gap-2">
-                          {canEdit && (
-                            <button
-                              className="rounded-md border border-slate-300 bg-white p-2 text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
-                              type="button"
-                              onClick={() => handleEditReserva(reserva)}
-                              disabled={isUpdating}
-                              title="Editar reserva"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </button>
-                          )}
-                          {canConfirm && (
-                            <button
-                              className="rounded-md border border-emerald-200 bg-white p-2 text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
-                              type="button"
-                              onClick={() => handleConfirmReserva(reserva.id)}
-                              disabled={isUpdating}
-                              title="Confirmar reserva"
-                            >
-                              <Check className="h-4 w-4" />
-                            </button>
-                          )}
-                          {canCancel && (
-                            <button
-                              className="rounded-md border border-red-200 bg-white p-2 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                              type="button"
-                              onClick={() => handleCancelReserva(reserva.id)}
-                              disabled={isUpdating}
-                              title="Cancelar reserva"
-                            >
-                              <Ban className="h-4 w-4" />
-                            </button>
-                          )}
-                          {!canConfirm && !canCancel && (
-                            <span className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
-                              Sin acciones
+                          <div className="grid gap-2 text-sm text-slate-600 xl:grid-cols-2">
+                            <span className="rounded-md bg-white px-3 py-2 ring-1 ring-slate-200">
+                              {formatReservaDate(reserva.fecha)} · {momentoLabels[reserva.momento]}
                             </span>
-                          )}
+                            <span className="rounded-md bg-white px-3 py-2 text-center font-bold tabular-nums text-slate-800 ring-1 ring-slate-200">
+                              {formatPrice(reserva.precioFinal)}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-end gap-2">
+                            {canEdit && (
+                              <button
+                                className="rounded-md border border-slate-300 bg-white p-2 text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                                type="button"
+                                onClick={() => handleEditReserva(reserva)}
+                                disabled={isUpdating}
+                                title="Editar reserva"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                            )}
+                            {canConfirm && (
+                              <button
+                                className="rounded-md border border-emerald-200 bg-white p-2 text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                                type="button"
+                                onClick={() => handleConfirmReserva(reserva.id)}
+                                disabled={isUpdating}
+                                title="Confirmar reserva"
+                              >
+                                <Check className="h-4 w-4" />
+                              </button>
+                            )}
+                            {canCancel && (
+                              <button
+                                className="rounded-md border border-red-200 bg-white p-2 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+                                type="button"
+                                onClick={() => handleCancelReserva(reserva.id)}
+                                disabled={isUpdating}
+                                title="Cancelar reserva"
+                              >
+                                <Ban className="h-4 w-4" />
+                              </button>
+                            )}
+                            {!canConfirm && !canCancel && (
+                              <span className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
+                                Sin acciones
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         </section>
