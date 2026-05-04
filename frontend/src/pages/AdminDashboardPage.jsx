@@ -18,7 +18,7 @@ import {
   UserPlus,
   X
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
@@ -75,6 +75,8 @@ const momentoOrder = {
   noche: 3
 };
 
+const AUTO_REFRESH_INTERVAL_MS = 60000;
+
 const weekDays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 const estadoBadgeClasses = {
@@ -98,6 +100,13 @@ const formatPrice = (price) => {
     currency: "ARS",
     maximumFractionDigits: 0
   });
+};
+
+const formatRefreshTime = (date) => {
+  return new Intl.DateTimeFormat("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
 };
 
 const normalizeText = (value) => {
@@ -206,6 +215,7 @@ const EstadoBadge = ({ estado }) => (
 export const AdminDashboardPage = () => {
   const canchaFormRef = useRef(null);
   const reservaFormRef = useRef(null);
+  const autoRefreshInFlightRef = useRef(false);
   const today = getLocalDateString();
   const [canchas, setCanchas] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -226,8 +236,17 @@ export const AdminDashboardPage = () => {
   const [isSubmittingCliente, setIsSubmittingCliente] = useState(false);
   const [updatingReservaId, setUpdatingReservaId] = useState(null);
   const [deletingCanchaId, setDeletingCanchaId] = useState(null);
+  const [isRefreshingData, setIsRefreshingData] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const hasPendingMutation =
+    isSubmitting ||
+    isSubmittingReserva ||
+    isSubmittingCliente ||
+    Boolean(updatingReservaId) ||
+    Boolean(deletingCanchaId);
 
   const activeReservas = useMemo(
     () => reservas.filter((reserva) => activeReservaStates.includes(reserva.estado)),
@@ -343,7 +362,7 @@ export const AdminDashboardPage = () => {
     });
   }, [editingReservaId, reservaForm.canchaId, reservaForm.fecha, reservaForm.momento, reservas]);
 
-  const loadAdminData = async () => {
+  const loadAdminData = useCallback(async () => {
     const [canchasData, reservasData, clientesData] = await Promise.all([
       canchaService.getCanchasAdmin(),
       reservaService.getReservas(),
@@ -352,7 +371,8 @@ export const AdminDashboardPage = () => {
     setCanchas(canchasData.canchas);
     setReservas(reservasData.reservas);
     setClientes(clientesData.clientes);
-  };
+    setLastUpdatedAt(new Date());
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -366,7 +386,40 @@ export const AdminDashboardPage = () => {
     };
 
     load();
-  }, []);
+  }, [loadAdminData]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return undefined;
+    }
+
+    const refreshData = async () => {
+      if (
+        hasPendingMutation ||
+        autoRefreshInFlightRef.current ||
+        (typeof document !== "undefined" && document.visibilityState === "hidden")
+      ) {
+        return;
+      }
+
+      try {
+        autoRefreshInFlightRef.current = true;
+        setIsRefreshingData(true);
+        await loadAdminData();
+      } catch (refreshError) {
+        console.error(refreshError);
+      } finally {
+        autoRefreshInFlightRef.current = false;
+        setIsRefreshingData(false);
+      }
+    };
+
+    const intervalId = window.setInterval(refreshData, AUTO_REFRESH_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [hasPendingMutation, isLoading, loadAdminData]);
 
   const handleFormChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -657,6 +710,12 @@ export const AdminDashboardPage = () => {
 
   return (
     <section className="space-y-6">
+      {isRefreshingData && (
+        <div className="fixed left-0 top-0 z-50 h-1 w-full bg-emerald-100">
+          <div className="h-full w-1/3 animate-pulse rounded-r-full bg-emerald-500" />
+        </div>
+      )}
+
       {(error || success) && (
         <div
           className={`fixed left-1/2 top-1/2 z-50 w-[min(420px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border p-4 text-sm shadow-xl ${
@@ -702,6 +761,19 @@ export const AdminDashboardPage = () => {
         <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-right shadow-sm">
           <p className="text-sm font-medium text-slate-500">Reservas de hoy</p>
           <p className="mt-1 text-2xl font-black text-slate-950">{reservasHoy.length}</p>
+          <p className="mt-2 inline-flex items-center justify-end gap-1.5 text-xs font-semibold text-slate-500">
+            {isRefreshingData ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Actualizando...
+              </>
+            ) : (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-600" />
+                {lastUpdatedAt ? `Actualizado ${formatRefreshTime(lastUpdatedAt)}` : "Actualización automática"}
+              </>
+            )}
+          </p>
         </div>
       </div>
 
