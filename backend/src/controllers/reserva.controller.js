@@ -3,7 +3,7 @@ import { Cancha, Pago, Reserva, User } from "../models/index.js";
 import { hashPassword } from "../services/auth.service.js";
 import {
   createReservaWithRules,
-  expirePendingReservations,
+  expireStaleReservations,
   updateReservaWithRules
 } from "../services/reserva.service.js";
 import { httpError } from "../utils/httpError.js";
@@ -26,7 +26,7 @@ const normalizeEmail = (email) => email.toLowerCase().trim();
 
 export const getReservas = async (req, res, next) => {
   try {
-    await expirePendingReservations();
+    await expireStaleReservations();
 
     const where = canManageReservas(req.user) ? {} : { usuarioId: req.user.id };
     const reservas = await Reserva.findAll({
@@ -46,7 +46,7 @@ export const getReservas = async (req, res, next) => {
 
 export const getMisReservas = async (req, res, next) => {
   try {
-    await expirePendingReservations();
+    await expireStaleReservations();
 
     const reservas = await Reserva.findAll({
       where: { usuarioId: req.user.id },
@@ -194,6 +194,8 @@ export const updateReservaAdmin = async (req, res, next) => {
 
 export const cancelReserva = async (req, res, next) => {
   try {
+    await expireStaleReservations();
+
     const reserva = await Reserva.findByPk(req.params.id, { include: reservaInclude });
 
     if (!reserva) {
@@ -225,6 +227,8 @@ export const cancelReserva = async (req, res, next) => {
 
 export const confirmReserva = async (req, res, next) => {
   try {
+    await expireStaleReservations();
+
     const reserva = await Reserva.findByPk(req.params.id, { include: reservaInclude });
 
     if (!reserva) {

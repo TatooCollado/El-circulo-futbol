@@ -1,4 +1,5 @@
 import { Cancha, Pago, Reserva, User } from "../models/index.js";
+import { expireStaleReservations } from "../services/reserva.service.js";
 import { httpError } from "../utils/httpError.js";
 
 const pagoInclude = [
@@ -36,6 +37,8 @@ const ensureReservaActivaParaPago = async (reserva, pago) => {
 
 export const getPagoById = async (req, res, next) => {
   try {
+    await expireStaleReservations();
+
     const pago = await Pago.findByPk(req.params.id, { include: pagoInclude });
 
     if (!pago) {
@@ -52,6 +55,8 @@ export const getPagoById = async (req, res, next) => {
 
 export const createPreferenciaPago = async (req, res, next) => {
   try {
+    await expireStaleReservations();
+
     const reserva = await Reserva.findByPk(req.body.reservaId, {
       include: [{ model: Pago }, { model: Cancha }]
     });
@@ -85,6 +90,8 @@ export const createPreferenciaPago = async (req, res, next) => {
 
 export const simulatePago = async (req, res, next) => {
   try {
+    await expireStaleReservations();
+
     const pago = await Pago.findByPk(req.params.id, { include: pagoInclude });
 
     if (!pago) {

@@ -1,18 +1,16 @@
 import { body, param } from "express-validator";
+import { getBusinessDateString } from "../utils/businessDate.js";
 
 const momentos = ["manana", "tarde", "noche"];
 const estadosAdmin = ["pendiente_pago", "confirmada"];
 
 const validateFecha = (value) => {
   const selectedDate = new Date(`${value}T00:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   if (Number.isNaN(selectedDate.getTime())) {
     throw new Error("La fecha no es valida");
   }
 
-  if (selectedDate < today) {
+  if (value < getBusinessDateString()) {
     throw new Error("La fecha no puede ser anterior a hoy");
   }
 

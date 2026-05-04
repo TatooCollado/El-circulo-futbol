@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { Cancha, Reserva } from "../models/index.js";
-import { expirePendingReservations } from "../services/reserva.service.js";
+import { expireStaleReservations } from "../services/reserva.service.js";
 import { httpError } from "../utils/httpError.js";
 
 const momentos = ["manana", "tarde", "noche"];
@@ -61,7 +61,7 @@ export const getCanchaById = async (req, res, next) => {
 
 export const getCanchaDisponibilidad = async (req, res, next) => {
   try {
-    await expirePendingReservations();
+    await expireStaleReservations();
 
     const cancha = await Cancha.findByPk(req.params.id);
 
@@ -128,6 +128,8 @@ export const updateCancha = async (req, res, next) => {
 
 export const deleteCancha = async (req, res, next) => {
   try {
+    await expireStaleReservations();
+
     const cancha = await Cancha.findByPk(req.params.id);
 
     if (!cancha) {

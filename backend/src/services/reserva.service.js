@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Cancha, Pago, Reserva, sequelize } from "../models/index.js";
+import { getBusinessDateString } from "../utils/businessDate.js";
 import { httpError } from "../utils/httpError.js";
 
 const RESERVA_TOLERANCIA_MINUTOS = 15;
@@ -11,25 +12,46 @@ export const getReservaVencimiento = () => {
   return venceEn;
 };
 
-export const expirePendingReservations = async () => {
-  const expiredReservas = await Reserva.findAll({
+export const expireStaleReservations = async () => {
+  const today = getBusinessDateString();
+  const expiredPendingReservas = await Reserva.findAll({
     attributes: ["id"],
     where: {
       estado: "pendiente_pago",
-      venceEn: {
-        [Op.lt]: new Date()
+      [Op.or]: [
+        {
+          venceEn: {
+            [Op.lt]: new Date()
+          }
+        },
+        {
+          fecha: {
+            [Op.lt]: today
+          }
+        }
+      ]
+    }
+  });
+  const expiredConfirmedReservas = await Reserva.findAll({
+    attributes: ["id"],
+    where: {
+      estado: "confirmada",
+      fecha: {
+        [Op.lt]: today
       }
     }
   });
 
-  const expiredReservaIds = expiredReservas.map((reserva) => reserva.id);
+  const expiredPendingReservaIds = expiredPendingReservas.map((reserva) => reserva.id);
+  const expiredConfirmedReservaIds = expiredConfirmedReservas.map((reserva) => reserva.id);
+  const expiredReservaIds = [...new Set([...expiredPendingReservaIds, ...expiredConfirmedReservaIds])];
 
   if (expiredReservaIds.length === 0) {
     return;
   }
 
   await Reserva.update(
-    { estado: "vencida" },
+    { estado: "vencida", venceEn: null },
     {
       where: {
         id: {
@@ -39,21 +61,23 @@ export const expirePendingReservations = async () => {
     }
   );
 
-  await Pago.update(
-    { estado: "cancelado" },
-    {
-      where: {
-        reservaId: {
-          [Op.in]: expiredReservaIds
-        },
-        estado: "pendiente"
+  if (expiredPendingReservaIds.length > 0) {
+    await Pago.update(
+      { estado: "cancelado" },
+      {
+        where: {
+          reservaId: {
+            [Op.in]: expiredPendingReservaIds
+          },
+          estado: "pendiente"
+        }
       }
-    }
-  );
+    );
+  }
 };
 
 export const assertTurnoDisponible = async ({ canchaId, fecha, momento, excludeReservaId, transaction }) => {
-  await expirePendingReservations();
+  await expireStaleReservations();
 
   const existingReserva = await Reserva.findOne({
     where: {
@@ -111,6 +135,8 @@ export const createReservaWithRules = async ({ usuarioId, canchaId, fecha, momen
 };
 
 export const updateReservaWithRules = async ({ reservaId, usuarioId, canchaId, fecha, momento, estado }) => {
+  await expireStaleReservations();
+
   return sequelize.transaction(async (transaction) => {
     const reserva = await Reserva.findByPk(reservaId, { transaction });
 

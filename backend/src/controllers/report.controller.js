@@ -1,20 +1,12 @@
 import { Op, fn, literal } from "sequelize";
 import { Cancha, Pago, Reserva, User } from "../models/index.js";
-import { expirePendingReservations } from "../services/reserva.service.js";
+import { expireStaleReservations } from "../services/reserva.service.js";
+import { getBusinessDateString } from "../utils/businessDate.js";
 import { httpError } from "../utils/httpError.js";
 
 const toNumber = (value) => Number(value || 0);
 const momentos = ["manana", "tarde", "noche"];
 const activeReservaStates = ["pendiente_pago", "confirmada"];
-
-const getLocalDateString = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
 
 const isValidDateString = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
 
@@ -78,9 +70,9 @@ const getPercentage = (value, total) => {
 
 export const getGeneralReport = async (req, res, next) => {
   try {
-    await expirePendingReservations();
+    await expireStaleReservations();
 
-    const today = getLocalDateString();
+    const today = getBusinessDateString();
     const { fechaDesde, fechaHasta, reservaDateWhere } = parseReportFilters(req.query);
     const activeReservaWhere = {
       ...reservaDateWhere,
