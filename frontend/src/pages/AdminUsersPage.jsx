@@ -10,7 +10,7 @@ const emptyClienteForm = {
   password: ""
 };
 
-const USERS_PAGE_SIZE = 8;
+const USERS_PAGE_SIZE = 5;
 
 const normalizeText = (value) => {
   return String(value ?? "")

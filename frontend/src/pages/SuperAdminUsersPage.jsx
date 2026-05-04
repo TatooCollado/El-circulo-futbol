@@ -25,7 +25,7 @@ const rolePriority = {
   cliente: 3
 };
 
-const USERS_PAGE_SIZE = 8;
+const USERS_PAGE_SIZE = 5;
 
 const getPagination = (items, page) => {
   const totalItems = items.length;
