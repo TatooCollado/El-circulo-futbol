@@ -43,5 +43,9 @@ export const canAccessPath = (rol, path = "") => {
 };
 
 export const getRedirectAfterLogin = (rol, requestedPath) => {
+  if (!requestedPath || requestedPath === "/" || requestedPath === "/login" || requestedPath === "/register") {
+    return getRoleHomePath(rol);
+  }
+
   return canAccessPath(rol, requestedPath) ? requestedPath : getRoleHomePath(rol);
 };

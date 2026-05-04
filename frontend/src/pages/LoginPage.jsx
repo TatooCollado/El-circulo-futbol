@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
@@ -8,7 +8,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { login } = useAuth();
+  const { isAuthenticated, login, user } = useAuth();
   const [form, setForm] = useState({
     email: "",
     password: ""
@@ -16,6 +16,12 @@ export const LoginPage = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const sessionExpired = searchParams.get("session") === "expired";
+
+  useEffect(() => {
+    if (isAuthenticated && user?.rol) {
+      navigate(getRedirectAfterLogin(user.rol, location.state?.from), { replace: true });
+    }
+  }, [isAuthenticated, location.state?.from, navigate, user?.rol]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
