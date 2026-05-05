@@ -67,6 +67,28 @@ const getMobileNavClass = ({ isActive }) =>
       : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
   ].join(" ");
 
+const BrandMark = () => (
+  <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-emerald-600 shadow-sm shadow-emerald-900/20 ring-1 ring-emerald-700/10">
+    <span className="absolute inset-0 bg-[linear-gradient(135deg,#047857,#10b981_62%,#84cc16)]" />
+    <span className="absolute left-1/2 top-0 h-full w-px bg-white/20" />
+    <span className="absolute bottom-2 left-2 text-[13px] font-black leading-none tracking-tight text-white">
+      EC
+    </span>
+    <svg
+      className="absolute right-1.5 top-1.5 h-5 w-5 drop-shadow-sm"
+      viewBox="0 0 32 32"
+      aria-hidden="true"
+    >
+      <circle cx="16" cy="16" r="13" fill="#f8fafc" />
+      <path fill="#020617" d="m16 8 5 4-2 6h-6l-2-6 5-4Z" />
+      <path
+        fill="#020617"
+        d="m6 15 5-3 2 6-5 5-2-8Zm20-3-5 3-2 8h5l2-11ZM12 26l1-6h6l1 6-4 2-4-2Z"
+      />
+    </svg>
+  </span>
+);
+
 export const MainLayout = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -89,9 +111,7 @@ export const MainLayout = () => {
               className="flex items-center gap-3 rounded-md pr-2 text-slate-950"
               onClick={closeMenu}
             >
-              <span className="grid h-10 w-10 place-items-center rounded-md bg-emerald-600 text-sm font-black text-white shadow-sm shadow-emerald-900/20">
-                EC
-              </span>
+              <BrandMark />
               <span className="leading-tight">
                 <span className="block text-lg font-black tracking-normal">El Círculo</span>
                 <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
