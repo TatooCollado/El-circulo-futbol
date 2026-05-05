@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2, UserCog } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { PageHero, StatusMessage } from "../components/PolishedUi.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { userService } from "../services/userService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
@@ -212,29 +213,23 @@ export const SuperAdminUsersPage = () => {
 
   if (isLoading) {
     return (
-      <section className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
-        Cargando usuarios...
-      </section>
+      <StatusMessage>Cargando usuarios...</StatusMessage>
     );
   }
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Usuarios</h1>
-        <p className="mt-2 text-slate-600">Gestioná cuentas, roles y accesos del sistema.</p>
-      </div>
+      <PageHero
+        eyebrow="Control de accesos"
+        title="Usuarios"
+        description="Gestioná cuentas, roles y estado de acceso con una vista clara para operación y soporte."
+        icon={UserCog}
+        statLabel="Activos"
+        statValue={activeUsers.length}
+      />
 
       {(error || success) && (
-        <div
-          className={`rounded-md border p-4 text-sm ${
-            error
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
-          }`}
-        >
-          {error || success}
-        </div>
+        <StatusMessage type={error ? "error" : "success"}>{error || success}</StatusMessage>
       )}
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -253,7 +248,7 @@ export const SuperAdminUsersPage = () => {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2">
             <UserCog className="h-5 w-5 text-emerald-700" />
             <h2 className="text-xl font-bold">{editingUserId ? "Editar usuario" : "Nuevo usuario"}</h2>
@@ -264,7 +259,7 @@ export const SuperAdminUsersPage = () => {
               <label className="block">
                 <span className="text-sm font-medium text-slate-700">Nombre</span>
                 <input
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  className="ec-input"
                   name="nombre"
                   value={form.nombre}
                   onChange={handleChange}
@@ -274,7 +269,7 @@ export const SuperAdminUsersPage = () => {
               <label className="block">
                 <span className="text-sm font-medium text-slate-700">Apellido</span>
                 <input
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  className="ec-input"
                   name="apellido"
                   value={form.apellido}
                   onChange={handleChange}
@@ -285,7 +280,7 @@ export const SuperAdminUsersPage = () => {
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Email</span>
               <input
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                className="ec-input"
                 name="email"
                 type="email"
                 value={form.email}
@@ -297,7 +292,7 @@ export const SuperAdminUsersPage = () => {
               <label className="block">
                 <span className="text-sm font-medium text-slate-700">Rol</span>
                 <select
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  className="ec-select"
                   name="rol"
                   value={form.rol}
                   onChange={handleChange}
@@ -314,7 +309,7 @@ export const SuperAdminUsersPage = () => {
                   {editingUserId ? "Nueva contraseña" : "Contraseña"}
                 </span>
                 <input
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  className="ec-input"
                   name="password"
                   type="password"
                   value={form.password}
@@ -342,7 +337,7 @@ export const SuperAdminUsersPage = () => {
 
             <div className="flex gap-2">
               <button
-                className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                className="ec-button-primary"
                 type="submit"
                 disabled={isSubmitting}
               >
@@ -352,7 +347,7 @@ export const SuperAdminUsersPage = () => {
 
               {editingUserId && (
                 <button
-                  className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  className="ec-button-outline"
                   type="button"
                   onClick={resetForm}
                 >
@@ -392,13 +387,13 @@ export const SuperAdminUsersPage = () => {
           </div>
 
           {filteredUsers.length === 0 && (
-            <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-slate-600">
               No hay usuarios para los filtros seleccionados.
             </div>
           )}
 
           {filteredUsers.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
               <span>
                 Mostrando {usersPagination.startIndex + 1}-{usersPagination.endIndex} de{" "}
                 {usersPagination.totalItems}
@@ -434,7 +429,7 @@ export const SuperAdminUsersPage = () => {
           )}
 
           {usersPagination.items.map((user) => (
-            <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={user.id}>
+            <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md" key={user.id}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h3 className="font-bold text-slate-950">

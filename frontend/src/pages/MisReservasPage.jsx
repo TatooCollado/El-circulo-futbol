@@ -1,5 +1,6 @@
-import { Ban, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CreditCard, History, X } from "lucide-react";
+import { Ban, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CreditCard, History, Trophy, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { EmptyState, PageHero, StatusMessage } from "../components/PolishedUi.jsx";
 import { pagoService } from "../services/pagoService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
@@ -110,10 +111,10 @@ const ReservaCard = ({
   onCancelReserva,
   onSimulatePago
 }) => (
-  <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+  <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:shadow-lg">
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div>
-        <h3 className="text-lg font-bold text-slate-950">{reserva.Cancha?.nombre || "Cancha"}</h3>
+        <h3 className="text-xl font-black text-slate-950">{reserva.Cancha?.nombre || "Cancha"}</h3>
         <p className="mt-1 flex items-center gap-2 text-sm capitalize text-slate-600">
           <CalendarDays className="h-4 w-4 text-emerald-700" />
           {formatReservaDate(reserva.fecha)}
@@ -125,7 +126,7 @@ const ReservaCard = ({
 
       <div className="flex flex-col gap-3 lg:items-end">
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-md bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-700">
+          <span className="rounded-md bg-slate-950 px-2 py-1 text-sm font-black text-white">
             {formatPrice(reserva.precioFinal)}
           </span>
           <span
@@ -150,7 +151,7 @@ const ReservaCard = ({
           {reserva.estado === "pendiente_pago" && reserva.Pago?.estado === "pendiente" && (
             <>
               <button
-                className="inline-flex items-center gap-2 rounded-md border border-emerald-200 px-3 py-1.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                className="ec-button-primary px-3 py-1.5"
                 type="button"
                 onClick={() => onSimulatePago(reserva.Pago.id, "aprobado")}
                 disabled={processingPagoId === reserva.Pago.id}
@@ -159,7 +160,7 @@ const ReservaCard = ({
                 {processingPagoId === reserva.Pago.id ? "Procesando..." : "Pagar demo"}
               </button>
               <button
-                className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                className="ec-button-outline px-3 py-1.5"
                 type="button"
                 onClick={() => onSimulatePago(reserva.Pago.id, "rechazado")}
                 disabled={processingPagoId === reserva.Pago.id}
@@ -172,7 +173,7 @@ const ReservaCard = ({
 
           {canCancelReserva(reserva.estado) && (
             <button
-              className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:opacity-50"
               type="button"
               onClick={() => onCancelReserva(reserva.id)}
               disabled={cancellingId === reserva.id}
@@ -202,25 +203,25 @@ const ReservaSection = ({
   const hasPagination = pagination.totalPages > 1;
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+    <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2">
           <Icon className="h-5 w-5 text-emerald-700" />
           <div>
-            <h2 className="text-xl font-bold">{title}</h2>
+            <h2 className="text-xl font-black text-slate-950">{title}</h2>
             <p className="text-sm text-slate-500">{description}</p>
           </div>
         </div>
-        <span className="rounded-md bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-700">
+        <span className="rounded-md bg-slate-950 px-2 py-1 text-sm font-black text-white">
           {pagination.totalItems}
         </span>
       </div>
 
       {pagination.totalItems === 0 ? (
-        <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">{emptyMessage}</div>
+        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">{emptyMessage}</div>
       ) : (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
             <span>
               Mostrando {pagination.startIndex + 1}-{pagination.endIndex} de {pagination.totalItems}
             </span>
@@ -400,33 +401,27 @@ export const MisReservasPage = () => {
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Mis reservas</h1>
-        <p className="mt-2 text-slate-600">Próximos turnos e historial de reservas realizadas.</p>
-      </div>
+      <PageHero
+        eyebrow="Tu agenda de fútbol"
+        title="Mis reservas"
+        description="Revisá tus próximos turnos, simulá pagos pendientes y consultá tu historial sin perder el hilo."
+        icon={Trophy}
+        statLabel="Activas"
+        statValue={proximasReservas.length}
+      />
 
-      {isLoading && (
-        <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
-          Cargando reservas...
-        </div>
-      )}
+      {isLoading && <StatusMessage>Cargando reservas...</StatusMessage>}
 
       {(error || success) && (
-        <div
-          className={`rounded-md border p-4 text-sm ${
-            error
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
-          }`}
-        >
-          {error || success}
-        </div>
+        <StatusMessage type={error ? "error" : "success"}>{error || success}</StatusMessage>
       )}
 
       {!isLoading && !error && reservas.length === 0 && (
-        <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
-          Todavía no tenés reservas.
-        </div>
+        <EmptyState
+          icon={CalendarDays}
+          title="Todavía no tenés reservas"
+          description="Cuando elijas una cancha, tus próximos partidos van a aparecer acá."
+        />
       )}
 
       {!isLoading && reservas.length > 0 && (

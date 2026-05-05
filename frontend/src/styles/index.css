@@ -6,3 +6,40 @@ body {
   margin: 0;
 }
 
+@layer base {
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 28rem),
+      linear-gradient(180deg, #f8fafc 0%, #eef6f3 100%);
+  }
+}
+
+@layer components {
+  .ec-input {
+    @apply mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100;
+  }
+
+  .ec-select {
+    @apply mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100;
+  }
+
+  .ec-label {
+    @apply text-sm font-bold text-slate-700;
+  }
+
+  .ec-button-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-black text-white shadow-sm shadow-emerald-900/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none;
+  }
+
+  .ec-button-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400;
+  }
+
+  .ec-button-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .ec-section-title {
+    @apply text-2xl font-black leading-tight text-slate-950;
+  }
+}

@@ -1,5 +1,6 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Mail, Plus, Search, UserPlus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { PageHero, StatusMessage } from "../components/PolishedUi.jsx";
 import { userService } from "../services/userService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
@@ -152,29 +153,23 @@ export const AdminUsersPage = () => {
 
   if (isLoading) {
     return (
-      <section className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
-        Cargando usuarios...
-      </section>
+      <StatusMessage>Cargando usuarios...</StatusMessage>
     );
   }
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Usuarios</h1>
-        <p className="mt-2 text-slate-600">Clientes activos del complejo.</p>
-      </div>
+      <PageHero
+        eyebrow="Comunidad del complejo"
+        title="Clientes"
+        description="Alta rápida de jugadores y consulta de clientes activos para gestionar reservas manuales."
+        icon={Users}
+        statLabel="Clientes"
+        statValue={clientes.length}
+      />
 
       {(error || success) && (
-        <div
-          className={`rounded-md border p-4 text-sm ${
-            error
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
-          }`}
-        >
-          {error || success}
-        </div>
+        <StatusMessage type={error ? "error" : "success"}>{error || success}</StatusMessage>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -203,7 +198,7 @@ export const AdminUsersPage = () => {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2">
             <UserPlus className="h-5 w-5 text-emerald-700" />
             <h2 className="text-xl font-bold">Nuevo cliente</h2>
@@ -214,7 +209,7 @@ export const AdminUsersPage = () => {
               <label className="block">
                 <span className="text-sm font-medium text-slate-700">Nombre</span>
                 <input
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  className="ec-input"
                   name="nombre"
                   value={form.nombre}
                   onChange={handleChange}
@@ -224,7 +219,7 @@ export const AdminUsersPage = () => {
               <label className="block">
                 <span className="text-sm font-medium text-slate-700">Apellido</span>
                 <input
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  className="ec-input"
                   name="apellido"
                   value={form.apellido}
                   onChange={handleChange}
@@ -236,7 +231,7 @@ export const AdminUsersPage = () => {
               <span className="text-sm font-medium text-slate-700">Email</span>
               <input
                 autoComplete="email"
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                className="ec-input"
                 name="email"
                 type="email"
                 value={form.email}
@@ -248,7 +243,7 @@ export const AdminUsersPage = () => {
               <span className="text-sm font-medium text-slate-700">Contraseña provisoria</span>
               <input
                 autoComplete="new-password"
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                className="ec-input"
                 name="password"
                 type="password"
                 value={form.password}
@@ -257,7 +252,7 @@ export const AdminUsersPage = () => {
             </label>
 
             <button
-              className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:bg-slate-400"
+              className="ec-button-primary"
               type="submit"
               disabled={isSubmitting}
             >
@@ -282,13 +277,13 @@ export const AdminUsersPage = () => {
           </div>
 
           {filteredClientes.length === 0 && (
-            <div className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-slate-600">
               No hay clientes para la búsqueda ingresada.
             </div>
           )}
 
           {filteredClientes.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
               <span>
                 Mostrando {clientesPagination.startIndex + 1}-{clientesPagination.endIndex} de{" "}
                 {clientesPagination.totalItems}
@@ -324,7 +319,7 @@ export const AdminUsersPage = () => {
           )}
 
           {clientesPagination.items.map((cliente) => (
-            <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={cliente.id}>
+            <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md" key={cliente.id}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h3 className="font-bold text-slate-950">

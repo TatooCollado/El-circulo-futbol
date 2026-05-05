@@ -1,16 +1,23 @@
-import { ArrowLeft, CalendarDays, Clock } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, Clock, Goal } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { FieldArtwork, StatusMessage, SurfaceCard } from "../components/PolishedUi.jsx";
 import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
 const momentos = [
-  { value: "manana", label: "Mañana" },
-  { value: "tarde", label: "Tarde" },
-  { value: "noche", label: "Noche" }
+  { value: "manana", label: "Mañana", detail: "Arranque temprano" },
+  { value: "tarde", label: "Tarde", detail: "Partido con amigos" },
+  { value: "noche", label: "Noche", detail: "Después del trabajo" }
 ];
+
+const tipoLabels = {
+  futbol_5: "Fútbol 5",
+  futbol_7: "Fútbol 7",
+  futbol_11: "Fútbol 11"
+};
 
 const formatPrice = (price) => {
   return Number(price).toLocaleString("es-AR", {
@@ -55,7 +62,7 @@ export const ReservarCanchaPage = () => {
   useEffect(() => {
     if (!form.fecha) {
       setDisponibilidad(null);
-      return;
+      return undefined;
     }
 
     let shouldIgnore = false;
@@ -139,23 +146,17 @@ export const ReservarCanchaPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <section className="rounded-md border border-slate-200 bg-white p-6 text-slate-600">
-        Cargando cancha...
-      </section>
-    );
+    return <StatusMessage>Cargando cancha...</StatusMessage>;
   }
 
   if (!cancha) {
     return (
       <section className="space-y-4">
-        <Link className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700" to="/canchas">
+        <Link className="inline-flex items-center gap-2 text-sm font-black text-emerald-700" to="/canchas">
           <ArrowLeft className="h-4 w-4" />
           Volver a canchas
         </Link>
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error || "No se pudo cargar la cancha."}
-        </div>
+        <StatusMessage type="error">{error || "No se pudo cargar la cancha."}</StatusMessage>
       </section>
     );
   }
@@ -165,110 +166,104 @@ export const ReservarCanchaPage = () => {
   const hasAvailableMomentos = !disponibilidad || availableMomentos.length > 0;
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6">
-      <Link className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700" to="/canchas">
+    <section className="space-y-6">
+      <Link className="inline-flex items-center gap-2 text-sm font-black text-emerald-700" to="/canchas">
         <ArrowLeft className="h-4 w-4" />
         Volver a canchas
       </Link>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="aspect-[18/7] bg-[linear-gradient(135deg,#0f766e,#22c55e,#bef264)]" />
-        <div className="grid gap-6 p-6 md:grid-cols-[1fr_0.9fr]">
-          <div className="space-y-3">
-            <h1 className="text-3xl font-bold">{cancha.nombre}</h1>
-            <p className="text-slate-600">{cancha.descripcion || "Cancha disponible para reservar."}</p>
-            <div className="flex flex-wrap gap-2 text-sm">
-              <span className="rounded-md bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
-                {cancha.tipo.replace("_", " ")}
-              </span>
-              <span className="rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700">
-                {formatPrice(cancha.precio)}
-              </span>
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <SurfaceCard className="overflow-hidden">
+          <FieldArtwork title={cancha.nombre} label="Reserva" type={tipoLabels[cancha.tipo] || cancha.tipo} />
+          <div className="space-y-5 p-6">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-sm font-black text-emerald-700">
+                <Goal className="h-4 w-4" />
+                {tipoLabels[cancha.tipo] || cancha.tipo}
+              </p>
+              <h1 className="mt-4 text-4xl font-black leading-tight text-slate-950">{cancha.nombre}</h1>
+              <p className="mt-3 leading-7 text-slate-600">
+                {cancha.descripcion || "Cancha lista para reservar en el turno que prefieras."}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-slate-950 p-5 text-white">
+              <p className="text-xs font-black uppercase text-emerald-100">Precio del turno</p>
+              <p className="mt-1 text-4xl font-black">{formatPrice(cancha.precio)}</p>
+              <p className="mt-2 text-sm text-slate-300">El pago queda simulado desde tus reservas.</p>
             </div>
           </div>
+        </SurfaceCard>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+        <SurfaceCard className="p-6">
+          <div className="mb-6">
+            <p className="inline-flex items-center gap-2 rounded-md bg-amber-50 px-3 py-1.5 text-sm font-black text-amber-700">
+              <CalendarDays className="h-4 w-4" />
+              Tu turno
+            </p>
+            <h2 className="mt-4 text-3xl font-black text-slate-950">Elegí día y momento.</h2>
+            <p className="mt-2 leading-7 text-slate-600">
+              Te mostramos qué momentos siguen disponibles para esa fecha.
+            </p>
+          </div>
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <label className="block">
-              <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
+              <span className="flex items-center gap-2 text-sm font-black text-slate-700">
                 <CalendarDays className="h-4 w-4 text-emerald-700" />
                 Fecha
               </span>
-              <input
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-                min={today}
-                name="fecha"
-                type="date"
-                value={form.fecha}
-                onChange={handleChange}
-              />
+              <input className="ec-input" min={today} name="fecha" type="date" value={form.fecha} onChange={handleChange} />
             </label>
 
             <div>
-              <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
+              <span className="flex items-center gap-2 text-sm font-black text-slate-700">
                 <Clock className="h-4 w-4 text-emerald-700" />
                 Momento
               </span>
-              <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                {momentos.map((momento) => (
-                  <button
-                    className={`rounded-md border px-3 py-2 text-left text-sm font-semibold transition ${
-                      form.momento === momento.value
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-800"
-                        : "border-slate-300 text-slate-700 hover:bg-slate-100"
-                    } disabled:bg-slate-100 disabled:text-slate-400`}
-                    disabled={occupiedMomentos.includes(momento.value)}
-                    key={momento.value}
-                    type="button"
-                    onClick={() => handleMomentoChange(momento.value)}
-                  >
-                    <span className="block">{momento.label}</span>
-                    <span className="mt-1 block text-xs font-medium">
-                      {occupiedMomentos.includes(momento.value) ? "Ocupado" : "Disponible"}
-                    </span>
-                  </button>
-                ))}
+              <div className="mt-2 grid gap-3 sm:grid-cols-3">
+                {momentos.map((momento) => {
+                  const isOccupied = occupiedMomentos.includes(momento.value);
+                  const isSelected = form.momento === momento.value;
+
+                  return (
+                    <button
+                      className={`rounded-xl border p-4 text-left transition ${
+                        isSelected
+                          ? "border-emerald-500 bg-emerald-50 text-emerald-900 ring-4 ring-emerald-100"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-emerald-200 hover:bg-emerald-50/50"
+                      } disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400`}
+                      disabled={isOccupied}
+                      key={momento.value}
+                      type="button"
+                      onClick={() => handleMomentoChange(momento.value)}
+                    >
+                      <span className="block font-black">{momento.label}</span>
+                      <span className="mt-1 block text-xs font-bold">{isOccupied ? "Ocupado" : momento.detail}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {isLoadingDisponibilidad && (
-              <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-                Consultando disponibilidad...
-              </p>
-            )}
-
-            {availabilityError && (
-              <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {availabilityError}
-              </p>
-            )}
-
+            {isLoadingDisponibilidad && <StatusMessage>Consultando disponibilidad...</StatusMessage>}
+            {availabilityError && <StatusMessage type="error">{availabilityError}</StatusMessage>}
             {!isLoadingDisponibilidad && disponibilidad && !hasAvailableMomentos && (
-              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                No quedan turnos disponibles para esta fecha.
-              </p>
+              <StatusMessage type="warning">No quedan turnos disponibles para esta fecha.</StatusMessage>
             )}
-
-            {error && (
-              <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {error}
-              </p>
-            )}
-
-            {success && (
-              <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-                {success}
-              </p>
-            )}
+            {error && <StatusMessage type="error">{error}</StatusMessage>}
+            {success && <StatusMessage type="success">{success}</StatusMessage>}
 
             <button
-              className="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="ec-button-primary w-full"
               type="submit"
               disabled={isSubmitting || isLoadingDisponibilidad || !hasAvailableMomentos}
             >
+              <CheckCircle2 className="h-4 w-4" />
               {isSubmitting ? "Reservando..." : "Confirmar reserva"}
             </button>
           </form>
-        </div>
+        </SurfaceCard>
       </div>
     </section>
   );
