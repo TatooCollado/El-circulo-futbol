@@ -93,7 +93,7 @@ const FeatureCard = ({ icon: Icon, title, text }) => (
 export const HomePage = () => {
   return (
     <section className="space-y-12">
-      <section className="relative -mx-4 -mt-2 min-h-[620px] overflow-hidden bg-slate-950 px-4 py-10 text-white sm:rounded-xl sm:px-8 lg:px-10 lg:py-12">
+      <section className="relative -mt-2 min-h-[620px] overflow-hidden rounded-xl bg-slate-950 px-4 py-10 text-white sm:px-8 lg:px-10 lg:py-12">
         <FieldScene />
 
         <div className="relative flex min-h-[540px] max-w-6xl flex-col justify-between gap-10">
