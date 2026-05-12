@@ -251,6 +251,21 @@ export const AdminDashboardPage = () => {
     Boolean(updatingReservaId) ||
     Boolean(deletingCanchaId);
 
+  useEffect(() => {
+    if (!error && !success) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setError("");
+      setSuccess("");
+    }, 7000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [error, success]);
+
   const activeReservas = useMemo(
     () => reservas.filter((reserva) => activeReservaStates.includes(reserva.estado)),
     [reservas]
@@ -759,7 +774,7 @@ export const AdminDashboardPage = () => {
 
       {(error || success) && (
         <div
-          className={`fixed left-1/2 top-1/2 z-50 w-[min(420px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border p-4 text-sm shadow-xl ${
+          className={`fixed bottom-4 right-4 z-50 w-[calc(100vw-2rem)] rounded-lg border p-4 text-sm shadow-xl sm:bottom-6 sm:right-6 sm:w-[420px] ${
             error
               ? "border-red-200 bg-red-50 text-red-800"
               : "border-emerald-200 bg-emerald-50 text-emerald-800"
