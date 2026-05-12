@@ -1,6 +1,8 @@
 import {
   Activity,
+  Ban,
   CalendarDays,
+  Check,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
