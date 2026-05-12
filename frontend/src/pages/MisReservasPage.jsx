@@ -115,7 +115,7 @@ const ReservaCard = ({
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div>
         <h3 className="text-xl font-black text-slate-950">{reserva.Cancha?.nombre || "Cancha"}</h3>
-        <p className="mt-1 flex items-center gap-2 text-sm capitalize text-slate-600">
+        <p className="mt-1 flex items-center gap-2 text-sm text-slate-600">
           <CalendarDays className="h-4 w-4 text-emerald-700" />
           {formatReservaDate(reserva.fecha)}
         </p>

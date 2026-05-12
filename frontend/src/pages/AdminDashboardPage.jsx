@@ -1322,7 +1322,7 @@ export const AdminDashboardPage = () => {
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Vista calendario</p>
-                  <h3 className="mt-1 text-lg font-black capitalize text-slate-950">{getMonthLabel(calendarMonth)}</h3>
+                  <h3 className="mt-1 text-lg font-black text-slate-950">{getMonthLabel(calendarMonth)}</h3>
                   <p className="text-sm text-slate-500">Refleja los filtros activos y permite elegir un día.</p>
                 </div>
               </div>
