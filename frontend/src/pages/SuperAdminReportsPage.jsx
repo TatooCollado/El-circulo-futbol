@@ -1,6 +1,7 @@
 import { BarChart3, CalendarDays, DollarSign, Percent, TrendingUp, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageHero, StatusMessage } from "../components/PolishedUi.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { reportService } from "../services/reportService.js";
 import { getLocalDateString } from "../utils/date.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
@@ -116,6 +117,8 @@ const CountList = ({ title, data, labels }) => {
 };
 
 export const SuperAdminReportsPage = () => {
+  const toast = useToast();
+  const hasLoadedReportRef = useRef(false);
   const [filters, setFilters] = useState(getCurrentMonthRange);
   const [report, setReport] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,15 +131,22 @@ export const SuperAdminReportsPage = () => {
         setError("");
         const data = await reportService.getGeneralReport(filters);
         setReport(data);
+        hasLoadedReportRef.current = true;
       } catch (loadError) {
-        setError(getApiErrorMessage(loadError));
+        const message = getApiErrorMessage(loadError);
+
+        if (hasLoadedReportRef.current) {
+          toast.error(message);
+        } else {
+          setError(message);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     loadReport();
-  }, [filters]);
+  }, [filters, toast]);
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
@@ -210,10 +220,6 @@ export const SuperAdminReportsPage = () => {
           {isLoading && <span>· Actualizando...</span>}
         </div>
       </section>
-
-      {error && (
-        <StatusMessage type="error">{error}</StatusMessage>
-      )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={BarChart3} label="Reservas del período" value={report.resumen.totalReservas} />

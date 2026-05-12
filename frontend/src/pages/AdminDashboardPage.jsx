@@ -1,8 +1,6 @@
 import {
   Activity,
-  Ban,
   CalendarDays,
-  Check,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -20,6 +18,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageHero, StatusMessage } from "../components/PolishedUi.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
@@ -215,6 +214,7 @@ const EstadoBadge = ({ estado }) => (
 );
 
 export const AdminDashboardPage = () => {
+  const toast = useToast();
   const canchaFormRef = useRef(null);
   const reservaFormRef = useRef(null);
   const autoRefreshInFlightRef = useRef(false);
@@ -241,8 +241,6 @@ export const AdminDashboardPage = () => {
   const [deletingCanchaId, setDeletingCanchaId] = useState(null);
   const [isRefreshingData, setIsRefreshingData] = useState(false);
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const hasPendingMutation =
     isSubmitting ||
@@ -250,21 +248,6 @@ export const AdminDashboardPage = () => {
     isSubmittingCliente ||
     Boolean(updatingReservaId) ||
     Boolean(deletingCanchaId);
-
-  useEffect(() => {
-    if (!error && !success) {
-      return undefined;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setError("");
-      setSuccess("");
-    }, 7000);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [error, success]);
 
   const activeReservas = useMemo(
     () => reservas.filter((reserva) => activeReservaStates.includes(reserva.estado)),
@@ -414,14 +397,14 @@ export const AdminDashboardPage = () => {
       try {
         await loadAdminData();
       } catch (loadError) {
-        setError(getApiErrorMessage(loadError));
+        toast.error(getApiErrorMessage(loadError));
       } finally {
         setIsLoading(false);
       }
     };
 
     load();
-  }, [loadAdminData]);
+  }, [loadAdminData, toast]);
 
   useEffect(() => {
     if (isLoading) {
@@ -563,8 +546,6 @@ export const AdminDashboardPage = () => {
   };
 
   const handleEditCancha = (cancha) => {
-    setError("");
-    setSuccess("");
     setEditingCanchaId(cancha.id);
     setForm({
       nombre: cancha.nombre,
@@ -581,8 +562,6 @@ export const AdminDashboardPage = () => {
   };
 
   const handleEditReserva = (reserva) => {
-    setError("");
-    setSuccess("");
     setShowClienteForm(false);
     setEditingReservaId(reserva.id);
     setReservaForm({
@@ -601,18 +580,16 @@ export const AdminDashboardPage = () => {
 
   const handleSubmitCancha = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!form.nombre || form.precio === "") {
-      setError("Completá nombre y precio de la cancha.");
+      toast.error("Completá nombre y precio de la cancha.");
       return;
     }
 
     const precio = Number(form.precio);
 
     if (!Number.isFinite(precio) || precio <= 0) {
-      setError("El valor debe ser mayor a 0.");
+      toast.error("El valor debe ser mayor a 0.");
       return;
     }
 
@@ -625,16 +602,16 @@ export const AdminDashboardPage = () => {
 
       if (editingCanchaId) {
         await canchaService.updateCancha(editingCanchaId, payload);
-        setSuccess("Cancha actualizada correctamente.");
+        toast.success("Cancha actualizada correctamente.");
       } else {
         await canchaService.createCancha(payload);
-        setSuccess("Cancha creada correctamente.");
+        toast.success("Cancha creada correctamente.");
       }
 
       resetCanchaForm();
       await loadAdminData();
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmitting(false);
     }
@@ -642,11 +619,9 @@ export const AdminDashboardPage = () => {
 
   const handleSubmitCliente = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!clienteForm.nombre || !clienteForm.apellido || !clienteForm.email || !clienteForm.password) {
-      setError("Completá nombre, apellido, email y contraseña para crear el cliente.");
+      toast.error("Completá nombre, apellido, email y contraseña para crear el cliente.");
       return;
     }
 
@@ -659,9 +634,9 @@ export const AdminDashboardPage = () => {
         usuarioId: String(data.cliente.id)
       }));
       resetClienteForm();
-      setSuccess("Cliente creado y seleccionado para la reserva.");
+      toast.success("Cliente creado y seleccionado para la reserva.");
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmittingCliente(false);
     }
@@ -669,16 +644,14 @@ export const AdminDashboardPage = () => {
 
   const handleSubmitReserva = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!reservaForm.usuarioId || !reservaForm.canchaId || !reservaForm.fecha || !reservaForm.momento) {
-      setError("Completá usuario, cancha, fecha y momento para crear la reserva.");
+      toast.error("Completá usuario, cancha, fecha y momento para crear la reserva.");
       return;
     }
 
     if (selectedSlotConflict) {
-      setError("Ese turno ya está ocupado por otra reserva activa.");
+      toast.error("Ese turno ya está ocupado por otra reserva activa.");
       return;
     }
 
@@ -692,67 +665,58 @@ export const AdminDashboardPage = () => {
 
       if (editingReservaId) {
         await reservaService.updateReservaAdmin(editingReservaId, payload);
-        setSuccess("Reserva actualizada correctamente.");
+        toast.success("Reserva actualizada correctamente.");
       } else {
         await reservaService.createReservaAdmin(payload);
-        setSuccess("Reserva manual creada correctamente.");
+        toast.success("Reserva manual creada correctamente.");
       }
 
       resetReservaForm();
       await loadAdminData();
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmittingReserva(false);
     }
   };
 
   const handleDeleteCancha = async (canchaId) => {
-    setError("");
-    setSuccess("");
-
     try {
       setDeletingCanchaId(canchaId);
       const data = await canchaService.deleteCancha(canchaId);
-      setSuccess(data.message || "Cancha eliminada correctamente.");
+      toast.success(data.message || "Cancha eliminada correctamente.");
       await loadAdminData();
     } catch (deleteError) {
-      setError(getApiErrorMessage(deleteError));
+      toast.error(getApiErrorMessage(deleteError));
     } finally {
       setDeletingCanchaId(null);
     }
   };
 
   const handleConfirmReserva = async (reservaId) => {
-    setError("");
-    setSuccess("");
-
     try {
       setUpdatingReservaId(reservaId);
       await reservaService.confirmReserva(reservaId);
-      setSuccess("Reserva confirmada correctamente.");
+      toast.success("Reserva confirmada correctamente.");
       await loadAdminData();
     } catch (confirmError) {
-      setError(getApiErrorMessage(confirmError));
+      toast.error(getApiErrorMessage(confirmError));
     } finally {
       setUpdatingReservaId(null);
     }
   };
 
   const handleCancelReserva = async (reservaId) => {
-    setError("");
-    setSuccess("");
-
     try {
       setUpdatingReservaId(reservaId);
       await reservaService.cancelReserva(reservaId);
-      setSuccess("Reserva cancelada correctamente.");
+      toast.success("Reserva cancelada correctamente.");
       if (editingReservaId === reservaId) {
         resetReservaForm();
       }
       await loadAdminData();
     } catch (cancelError) {
-      setError(getApiErrorMessage(cancelError));
+      toast.error(getApiErrorMessage(cancelError));
     } finally {
       setUpdatingReservaId(null);
     }
@@ -769,39 +733,6 @@ export const AdminDashboardPage = () => {
       {isRefreshingData && (
         <div className="fixed left-0 top-0 z-50 h-1 w-full bg-emerald-100">
           <div className="h-full w-1/3 animate-pulse rounded-r-full bg-emerald-500" />
-        </div>
-      )}
-
-      {(error || success) && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 w-[calc(100vw-2rem)] rounded-lg border p-4 text-sm shadow-xl sm:bottom-6 sm:right-6 sm:w-[420px] ${
-            error
-              ? "border-red-200 bg-red-50 text-red-800"
-              : "border-emerald-200 bg-emerald-50 text-emerald-800"
-          }`}
-          role="alert"
-        >
-          <div className="flex items-start gap-3">
-            <span
-              className={`mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
-                error ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"
-              }`}
-            >
-              {error ? <Ban className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-            </span>
-            <p className="min-w-0 flex-1 font-semibold leading-6">{error || success}</p>
-            <button
-              className="rounded-md p-1 text-current opacity-70 transition hover:bg-white/70 hover:opacity-100"
-              type="button"
-              onClick={() => {
-                setError("");
-                setSuccess("");
-              }}
-              title="Cerrar aviso"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
         </div>
       )}
 

@@ -1,11 +1,12 @@
 import { Goal, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { StatusMessage } from "../components/PolishedUi.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
 export const RegisterPage = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   const { register } = useAuth();
   const [form, setForm] = useState({
@@ -14,7 +15,6 @@ export const RegisterPage = () => {
     email: "",
     password: ""
   });
-  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (event) => {
@@ -24,15 +24,14 @@ export const RegisterPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
 
     if (!form.nombre || !form.apellido || !form.email || !form.password) {
-      setError("Completá todos los campos para crear tu cuenta.");
+      toast.error("Completá todos los campos para crear tu cuenta.");
       return;
     }
 
     if (form.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+      toast.error("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
 
@@ -41,7 +40,7 @@ export const RegisterPage = () => {
       await register(form);
       navigate("/canchas", { replace: true });
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmitting(false);
     }
@@ -121,8 +120,6 @@ export const RegisterPage = () => {
               autoComplete="new-password"
             />
           </label>
-
-          {error && <StatusMessage type="error">{error}</StatusMessage>}
 
           <button className="ec-button-primary w-full" type="submit" disabled={isSubmitting}>
             <UserPlus className="h-4 w-4" />

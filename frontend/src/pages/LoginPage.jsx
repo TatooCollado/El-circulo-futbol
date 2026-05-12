@@ -1,8 +1,8 @@
 import { LockKeyhole, LogIn, Trophy } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { StatusMessage } from "../components/PolishedUi.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 import { getRedirectAfterLogin } from "../utils/roleNavigation.js";
 
@@ -29,15 +29,16 @@ const AuthVisual = () => (
 );
 
 export const LoginPage = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const sessionToastShownRef = useRef(false);
   const { isAuthenticated, login, user } = useAuth();
   const [form, setForm] = useState({
     email: "",
     password: ""
   });
-  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const sessionExpired = searchParams.get("session") === "expired";
 
@@ -47,6 +48,13 @@ export const LoginPage = () => {
     }
   }, [isAuthenticated, location.state?.from, navigate, user?.rol]);
 
+  useEffect(() => {
+    if (sessionExpired && !sessionToastShownRef.current) {
+      toast.warning("Tu sesión venció. Ingresá nuevamente para continuar.");
+      sessionToastShownRef.current = true;
+    }
+  }, [sessionExpired, toast]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
@@ -54,10 +62,9 @@ export const LoginPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
 
     if (!form.email || !form.password) {
-      setError("Completá email y contraseña para ingresar.");
+      toast.error("Completá email y contraseña para ingresar.");
       return;
     }
 
@@ -67,7 +74,7 @@ export const LoginPage = () => {
       const redirectTo = getRedirectAfterLogin(data.user.rol, location.state?.from);
       navigate(redirectTo, { replace: true });
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmitting(false);
     }
@@ -84,12 +91,6 @@ export const LoginPage = () => {
           </div>
           <h1 className="mt-5 text-4xl font-black text-slate-950">Ingresar</h1>
           <p className="mt-2 leading-7 text-slate-600">Accedé a tu cuenta para reservar y seguir tus turnos.</p>
-
-          {sessionExpired && (
-            <div className="mt-5">
-              <StatusMessage type="warning">Tu sesión venció. Ingresá nuevamente para continuar.</StatusMessage>
-            </div>
-          )}
 
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <label className="block">
@@ -117,8 +118,6 @@ export const LoginPage = () => {
                 placeholder="••••••••"
               />
             </label>
-
-            {error && <StatusMessage type="error">{error}</StatusMessage>}
 
             <button className="ec-button-primary w-full" type="submit" disabled={isSubmitting}>
               <LogIn className="h-4 w-4" />

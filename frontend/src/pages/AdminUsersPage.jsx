@@ -1,6 +1,7 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Mail, Plus, Search, UserPlus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { PageHero, StatusMessage } from "../components/PolishedUi.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { userService } from "../services/userService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
@@ -50,14 +51,13 @@ const getPagination = (items, page) => {
 };
 
 export const AdminUsersPage = () => {
+  const toast = useToast();
   const [clientes, setClientes] = useState([]);
   const [form, setForm] = useState(emptyClienteForm);
   const [search, setSearch] = useState("");
   const [clientesPage, setClientesPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const filteredClientes = useMemo(() => {
     const searchValue = normalizeText(search).trim();
@@ -87,14 +87,14 @@ export const AdminUsersPage = () => {
       try {
         await loadClientes();
       } catch (loadError) {
-        setError(getApiErrorMessage(loadError));
+        toast.error(getApiErrorMessage(loadError));
       } finally {
         setIsLoading(false);
       }
     };
 
     load();
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     setClientesPage((currentPage) => {
@@ -122,16 +122,14 @@ export const AdminUsersPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!form.nombre || !form.apellido || !form.email || !form.password) {
-      setError("Completá nombre, apellido, email y contraseña.");
+      toast.error("Completá nombre, apellido, email y contraseña.");
       return;
     }
 
     if (form.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+      toast.error("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
 
@@ -142,10 +140,10 @@ export const AdminUsersPage = () => {
         email: form.email.trim().toLowerCase()
       });
       setForm(emptyClienteForm);
-      setSuccess("Cliente creado correctamente.");
+      toast.success("Cliente creado correctamente.");
       await loadClientes();
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmitting(false);
     }
@@ -167,10 +165,6 @@ export const AdminUsersPage = () => {
         statLabel="Clientes"
         statValue={clientes.length}
       />
-
-      {(error || success) && (
-        <StatusMessage type={error ? "error" : "success"}>{error || success}</StatusMessage>
-      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">

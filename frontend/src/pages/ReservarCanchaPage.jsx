@@ -2,6 +2,7 @@ import { ArrowLeft, CalendarDays, CheckCircle2, Clock, Goal } from "lucide-react
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FieldArtwork, StatusMessage, SurfaceCard } from "../components/PolishedUi.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
@@ -30,6 +31,7 @@ const formatPrice = (price) => {
 };
 
 export const ReservarCanchaPage = () => {
+  const toast = useToast();
   const { canchaId } = useParams();
   const navigate = useNavigate();
   const today = useMemo(() => getLocalDateString(), []);
@@ -42,9 +44,8 @@ export const ReservarCanchaPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDisponibilidad, setIsLoadingDisponibilidad] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [availabilityError, setAvailabilityError] = useState("");
-  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const loadCancha = async () => {
@@ -52,7 +53,7 @@ export const ReservarCanchaPage = () => {
         const data = await canchaService.getCanchaById(canchaId);
         setCancha(data.cancha);
       } catch (loadError) {
-        setError(getApiErrorMessage(loadError));
+        setLoadError(getApiErrorMessage(loadError));
       } finally {
         setIsLoading(false);
       }
@@ -127,16 +128,14 @@ export const ReservarCanchaPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!form.fecha || !form.momento) {
-      setError("Elegí una fecha y un momento para reservar.");
+      toast.error("Elegí una fecha y un momento para reservar.");
       return;
     }
 
     if (disponibilidad && !disponibilidad.disponibles.includes(form.momento)) {
-      setError("Ese momento ya está ocupado. Elegí otro turno disponible.");
+      toast.error("Ese momento ya está ocupado. Elegí otro turno disponible.");
       return;
     }
 
@@ -147,10 +146,10 @@ export const ReservarCanchaPage = () => {
         fecha: form.fecha,
         momento: form.momento
       });
-      setSuccess("Reserva creada. Quedó pendiente de pago por 15 minutos.");
+      toast.success("Reserva creada. Quedó pendiente de pago por 15 minutos.");
       setTimeout(() => navigate("/mis-reservas"), 900);
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmitting(false);
     }
@@ -167,7 +166,7 @@ export const ReservarCanchaPage = () => {
           <ArrowLeft className="h-4 w-4" />
           Volver a canchas
         </Link>
-        <StatusMessage type="error">{error || "No se pudo cargar la cancha."}</StatusMessage>
+        <StatusMessage type="error">{loadError || "No se pudo cargar la cancha."}</StatusMessage>
       </section>
     );
   }
@@ -265,9 +264,6 @@ export const ReservarCanchaPage = () => {
             {!isLoadingDisponibilidad && disponibilidad && !hasAvailableMomentos && (
               <StatusMessage type="warning">No quedan turnos disponibles para esta fecha.</StatusMessage>
             )}
-            {error && <StatusMessage type="error">{error}</StatusMessage>}
-            {success && <StatusMessage type="success">{success}</StatusMessage>}
-
             <button
               className="ec-button-primary w-full"
               type="submit"

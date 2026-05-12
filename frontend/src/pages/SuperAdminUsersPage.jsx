@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2, UserCog } from "lucide
 import { useEffect, useMemo, useState } from "react";
 import { PageHero, StatusMessage } from "../components/PolishedUi.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { userService } from "../services/userService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
 
@@ -46,6 +47,7 @@ const getPagination = (items, page) => {
 };
 
 export const SuperAdminUsersPage = () => {
+  const toast = useToast();
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState(emptyUserForm);
@@ -54,8 +56,6 @@ export const SuperAdminUsersPage = () => {
   const [usersPage, setUsersPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const activeUsers = useMemo(() => users.filter((user) => user.activo), [users]);
   const admins = useMemo(
@@ -105,14 +105,14 @@ export const SuperAdminUsersPage = () => {
       try {
         await loadUsers();
       } catch (loadError) {
-        setError(getApiErrorMessage(loadError));
+        toast.error(getApiErrorMessage(loadError));
       } finally {
         setIsLoading(false);
       }
     };
 
     load();
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     setUsersPage((currentPage) => {
@@ -161,16 +161,14 @@ export const SuperAdminUsersPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!form.nombre || !form.apellido || !form.email || (!editingUserId && !form.password)) {
-      setError("Completá los campos obligatorios.");
+      toast.error("Completá los campos obligatorios.");
       return;
     }
 
     if (form.password && form.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+      toast.error("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
 
@@ -183,31 +181,28 @@ export const SuperAdminUsersPage = () => {
 
       if (editingUserId) {
         await userService.updateUser(editingUserId, payload);
-        setSuccess("Usuario actualizado correctamente.");
+        toast.success("Usuario actualizado correctamente.");
       } else {
         await userService.createUser(payload);
-        setSuccess("Usuario creado correctamente.");
+        toast.success("Usuario creado correctamente.");
       }
 
       resetForm();
       await loadUsers();
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError));
+      toast.error(getApiErrorMessage(submitError));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (userId) => {
-    setError("");
-    setSuccess("");
-
     try {
       await userService.deleteUser(userId);
-      setSuccess("Usuario dado de baja correctamente.");
+      toast.success("Usuario dado de baja correctamente.");
       await loadUsers();
     } catch (deleteError) {
-      setError(getApiErrorMessage(deleteError));
+      toast.error(getApiErrorMessage(deleteError));
     }
   };
 
@@ -227,10 +222,6 @@ export const SuperAdminUsersPage = () => {
         statLabel="Activos"
         statValue={activeUsers.length}
       />
-
-      {(error || success) && (
-        <StatusMessage type={error ? "error" : "success"}>{error || success}</StatusMessage>
-      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">

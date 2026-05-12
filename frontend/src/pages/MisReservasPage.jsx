@@ -1,6 +1,7 @@
 import { Ban, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CreditCard, History, Trophy, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState, PageHero, StatusMessage } from "../components/PolishedUi.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { pagoService } from "../services/pagoService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
@@ -271,14 +272,14 @@ const ReservaSection = ({
 };
 
 export const MisReservasPage = () => {
+  const toast = useToast();
   const [reservas, setReservas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
   const [processingPagoId, setProcessingPagoId] = useState(null);
   const [proximasPage, setProximasPage] = useState(1);
   const [historialPage, setHistorialPage] = useState(1);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loadError, setLoadError] = useState("");
 
   const today = getLocalDateString();
   const { proximasReservas, historialReservas } = useMemo(() => {
@@ -324,9 +325,10 @@ export const MisReservasPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
+        setLoadError("");
         await loadReservas();
       } catch (loadError) {
-        setError(getApiErrorMessage(loadError));
+        setLoadError(getApiErrorMessage(loadError));
       } finally {
         setIsLoading(false);
       }
@@ -364,36 +366,30 @@ export const MisReservasPage = () => {
   };
 
   const handleCancelReserva = async (reservaId) => {
-    setError("");
-    setSuccess("");
-
     try {
       setCancellingId(reservaId);
       await reservaService.cancelReserva(reservaId);
-      setSuccess("Reserva cancelada correctamente.");
       await loadReservas();
+      toast.success("Reserva cancelada correctamente.");
     } catch (cancelError) {
-      setError(getApiErrorMessage(cancelError));
+      toast.error(getApiErrorMessage(cancelError));
     } finally {
       setCancellingId(null);
     }
   };
 
   const handleSimulatePago = async (pagoId, resultado) => {
-    setError("");
-    setSuccess("");
-
     try {
       setProcessingPagoId(pagoId);
       await pagoService.simulatePago(pagoId, resultado);
-      setSuccess(
+      await loadReservas();
+      toast.success(
         resultado === "aprobado"
           ? "Pago aprobado. La reserva quedó confirmada."
           : "Pago rechazado. La reserva quedó rechazada."
       );
-      await loadReservas();
     } catch (paymentError) {
-      setError(getApiErrorMessage(paymentError));
+      toast.error(getApiErrorMessage(paymentError));
     } finally {
       setProcessingPagoId(null);
     }
@@ -412,11 +408,9 @@ export const MisReservasPage = () => {
 
       {isLoading && <StatusMessage>Cargando reservas...</StatusMessage>}
 
-      {(error || success) && (
-        <StatusMessage type={error ? "error" : "success"}>{error || success}</StatusMessage>
-      )}
+      {loadError && <StatusMessage type="error">{loadError}</StatusMessage>}
 
-      {!isLoading && !error && reservas.length === 0 && (
+      {!isLoading && !loadError && reservas.length === 0 && (
         <EmptyState
           icon={CalendarDays}
           title="Todavía no tenés reservas"
