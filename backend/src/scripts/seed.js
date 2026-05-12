@@ -29,14 +29,14 @@ const canchas = [
   {
     nombre: "Cancha 1",
     tipo: "futbol_5",
-    descripcion: "Cancha sintetica para futbol 5.",
+    descripcion: "Cancha sintética para fútbol 5.",
     precio: 18000,
     disponible: true
   },
   {
     nombre: "Cancha 2",
     tipo: "futbol_7",
-    descripcion: "Cancha amplia para futbol 7.",
+    descripcion: "Cancha amplia para fútbol 7.",
     precio: 26000,
     disponible: true
   }
@@ -94,4 +94,3 @@ const seed = async () => {
 };
 
 seed();
-

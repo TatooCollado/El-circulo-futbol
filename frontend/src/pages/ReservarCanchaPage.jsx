@@ -6,6 +6,7 @@ import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
+import { polishCanchaDescription } from "../utils/text.js";
 
 const momentos = [
   { value: "manana", label: "Mañana", detail: "Arranque temprano" },
@@ -183,14 +184,13 @@ export const ReservarCanchaPage = () => {
               </p>
               <h1 className="mt-4 text-4xl font-black leading-tight text-slate-950">{cancha.nombre}</h1>
               <p className="mt-3 leading-7 text-slate-600">
-                {cancha.descripcion || "Cancha lista para reservar en el turno que prefieras."}
+                {polishCanchaDescription(cancha.descripcion) || "Cancha lista para reservar en el turno que prefieras."}
               </p>
             </div>
 
             <div className="rounded-xl bg-slate-950 p-5 text-white">
               <p className="text-xs font-black uppercase text-emerald-100">Precio del turno</p>
               <p className="mt-1 text-4xl font-black">{formatPrice(cancha.precio)}</p>
-              <p className="mt-2 text-sm text-slate-300">El pago queda simulado desde tus reservas.</p>
             </div>
           </div>
         </SurfaceCard>

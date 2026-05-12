@@ -22,7 +22,7 @@ const AuthVisual = () => (
         Entrá y dejá tu próximo partido encaminado.
       </h2>
       <p className="mt-3 leading-7 text-emerald-50/85">
-        Reservá, pagá en modo demo y consultá tu historial desde un solo lugar.
+        Reservá una cancha y consultá tu historial desde un solo lugar.
       </p>
     </div>
   </div>

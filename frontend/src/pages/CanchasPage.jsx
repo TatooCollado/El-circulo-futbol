@@ -5,6 +5,7 @@ import { EmptyState, FieldArtwork, PageHero, StatusMessage } from "../components
 import { useAuth } from "../context/AuthContext.jsx";
 import { canchaService } from "../services/canchaService.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
+import { polishCanchaDescription } from "../utils/text.js";
 
 const tipoLabels = {
   futbol_5: "Fútbol 5",
@@ -124,7 +125,7 @@ export const CanchasPage = () => {
                   </span>
                 </div>
                 <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-600">
-                  {cancha.descripcion || "Cancha lista para reservar en el turno que prefieras."}
+                  {polishCanchaDescription(cancha.descripcion) || "Cancha lista para reservar en el turno que prefieras."}
                 </p>
               </div>
 
