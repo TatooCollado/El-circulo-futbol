@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { Cancha, Pago, Reserva, sequelize } from "../models/index.js";
 import { getBusinessDateString } from "../utils/businessDate.js";
 import { httpError } from "../utils/httpError.js";
+import { isMomentoDisponiblePorFecha } from "../utils/momentos.js";
 
 const RESERVA_TOLERANCIA_MINUTOS = 15;
 const ACTIVE_RESERVA_ESTADOS = ["pendiente_pago", "confirmada"];
@@ -78,6 +79,10 @@ export const expireStaleReservations = async () => {
 
 export const assertTurnoDisponible = async ({ canchaId, fecha, momento, excludeReservaId, transaction }) => {
   await expireStaleReservations();
+
+  if (!isMomentoDisponiblePorFecha(fecha, momento)) {
+    throw httpError(409, "Ese turno ya no esta disponible para la fecha seleccionada");
+  }
 
   const existingReserva = await Reserva.findOne({
     where: {

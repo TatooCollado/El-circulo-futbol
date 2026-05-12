@@ -2,8 +2,8 @@ import { Op } from "sequelize";
 import { Cancha, Reserva } from "../models/index.js";
 import { expireStaleReservations } from "../services/reserva.service.js";
 import { httpError } from "../utils/httpError.js";
+import { getMomentosDisponiblesPorFecha } from "../utils/momentos.js";
 
-const momentos = ["manana", "tarde", "noche"];
 const activeReservaStates = ["pendiente_pago", "confirmada"];
 
 const normalizeCanchaPayload = (body) => ({
@@ -80,6 +80,7 @@ export const getCanchaDisponibilidad = async (req, res, next) => {
       }
     });
     const ocupados = reservas.map((reserva) => reserva.momento);
+    const momentos = getMomentosDisponiblesPorFecha(req.query.fecha);
     const disponibles = momentos.filter((momento) => !ocupados.includes(momento));
 
     return res.json({

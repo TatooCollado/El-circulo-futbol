@@ -6,6 +6,7 @@ import { canchaService } from "../services/canchaService.js";
 import { reservaService } from "../services/reservaService.js";
 import { getLocalDateString } from "../utils/date.js";
 import { getApiErrorMessage } from "../utils/getApiErrorMessage.js";
+import { getMomentosDisponiblesPorFecha } from "../utils/momentos.js";
 import { polishCanchaDescription } from "../utils/text.js";
 
 const momentos = [
@@ -61,6 +62,14 @@ export const ReservarCanchaPage = () => {
   }, [canchaId]);
 
   useEffect(() => {
+    const allowedMomentos = getMomentosDisponiblesPorFecha(form.fecha);
+
+    if (allowedMomentos.length > 0 && !allowedMomentos.includes(form.momento)) {
+      setForm((currentForm) => ({ ...currentForm, momento: allowedMomentos[0] }));
+    }
+  }, [form.fecha, form.momento]);
+
+  useEffect(() => {
     if (!form.fecha) {
       setDisponibilidad(null);
       return undefined;
@@ -72,6 +81,7 @@ export const ReservarCanchaPage = () => {
       try {
         setIsLoadingDisponibilidad(true);
         setAvailabilityError("");
+        setDisponibilidad(null);
         const data = await canchaService.getDisponibilidad(canchaId, form.fecha);
 
         if (shouldIgnore) {
@@ -164,6 +174,10 @@ export const ReservarCanchaPage = () => {
 
   const occupiedMomentos = disponibilidad?.ocupados || [];
   const availableMomentos = disponibilidad?.disponibles || [];
+  const allowedMomentos = disponibilidad?.momentos || getMomentosDisponiblesPorFecha(form.fecha);
+  const visibleMomentos = momentos.filter((momento) => allowedMomentos.includes(momento.value));
+  const momentosGridClass =
+    visibleMomentos.length >= 3 ? "sm:grid-cols-3" : visibleMomentos.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-1";
   const hasAvailableMomentos = !disponibilidad || availableMomentos.length > 0;
 
   return (
@@ -221,8 +235,8 @@ export const ReservarCanchaPage = () => {
                 <Clock className="h-4 w-4 text-emerald-700" />
                 Momento
               </span>
-              <div className="mt-2 grid gap-3 sm:grid-cols-3">
-                {momentos.map((momento) => {
+              <div className={`mt-2 grid gap-3 ${momentosGridClass}`}>
+                {visibleMomentos.map((momento) => {
                   const isOccupied = occupiedMomentos.includes(momento.value);
                   const isSelected = form.momento === momento.value;
 
