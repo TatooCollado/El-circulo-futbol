@@ -1,0 +1,290 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="3220" viewBox="0 0 2400 3220">
+  <defs>
+    <style>
+      .bg{fill:#f6faf9}
+      .frame{fill:#fff;stroke:#dbe5e1;stroke-width:2}
+      .panel{fill:#fff;stroke:#dbe5e1;stroke-width:1.5}
+      .ink{fill:#020617;font-family:Inter,Arial,sans-serif;font-weight:800}
+      .text{fill:#334155;font-family:Inter,Arial,sans-serif;font-weight:500}
+      .muted{fill:#64748b;font-family:Inter,Arial,sans-serif;font-weight:500}
+      .tiny{fill:#64748b;font-family:Inter,Arial,sans-serif;font-size:14px;font-weight:700}
+      .label{fill:#047857;font-family:Inter,Arial,sans-serif;font-size:15px;font-weight:800}
+      .white{fill:#fff;font-family:Inter,Arial,sans-serif;font-weight:800}
+      .whiteText{fill:#e7fff5;font-family:Inter,Arial,sans-serif;font-weight:500}
+      .green{fill:#059669}
+      .dark{fill:#020617}
+      .soft{fill:#ecfdf5}
+      .line{stroke:#dbe5e1;stroke-width:1.5}
+      .pitchLine{stroke:#ffffff;stroke-opacity:.55;stroke-width:3;fill:none}
+      .shadow{filter:url(#shadow)}
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity=".12"/>
+    </filter>
+    <linearGradient id="field" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#042f2e"/>
+      <stop offset=".55" stop-color="#059669"/>
+      <stop offset="1" stop-color="#a3e635"/>
+    </linearGradient>
+    <linearGradient id="heroOverlay" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#020617" stop-opacity=".88"/>
+      <stop offset=".55" stop-color="#020617" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#020617" stop-opacity=".05"/>
+    </linearGradient>
+  </defs>
+
+  <rect class="bg" width="2400" height="3220"/>
+  <text x="90" y="90" class="ink" font-size="52">El Circulo Futbol</text>
+  <text x="90" y="128" class="muted" font-size="22">Maquetado de producto para presentar en Figma</text>
+
+  <!-- Design system rail -->
+  <g transform="translate(90 180)">
+    <rect class="frame shadow" width="520" height="520" rx="22"/>
+    <text x="34" y="58" class="ink" font-size="30">Sistema visual</text>
+    <text x="34" y="92" class="muted" font-size="18">Tokens y componentes base</text>
+    <g transform="translate(34 130)">
+      <circle cx="22" cy="22" r="22" fill="#059669"/><text x="62" y="28" class="text" font-size="18">Verde principal</text>
+      <circle cx="22" cy="82" r="22" fill="#064e3b"/><text x="62" y="88" class="text" font-size="18">Verde oscuro</text>
+      <circle cx="22" cy="142" r="22" fill="#020617"/><text x="62" y="148" class="text" font-size="18">Texto fuerte</text>
+      <circle cx="22" cy="202" r="22" fill="#facc15"/><text x="62" y="208" class="text" font-size="18">CTA destacado</text>
+      <circle cx="22" cy="262" r="22" fill="#dc2626"/><text x="62" y="268" class="text" font-size="18">Estados destructivos</text>
+    </g>
+    <g transform="translate(34 430)">
+      <rect x="0" y="0" width="160" height="46" rx="8" fill="#059669"/>
+      <text x="42" y="30" class="white" font-size="16">Reservar</text>
+      <rect x="180" y="0" width="150" height="46" rx="8" fill="#fff" stroke="#cbd5e1"/>
+      <text x="218" y="30" class="text" font-size="16" font-weight="800">Cancelar</text>
+    </g>
+  </g>
+
+  <!-- Flow -->
+  <g transform="translate(650 180)">
+    <rect class="frame shadow" width="1660" height="250" rx="22"/>
+    <text x="36" y="58" class="ink" font-size="30">Flujo principal</text>
+    <g transform="translate(36 100)">
+      <g>
+        <rect class="soft" width="190" height="70" rx="14"/><text x="22" y="30" class="label">01 Cliente</text><text x="22" y="52" class="muted" font-size="14">elige cancha</text>
+      </g>
+      <path d="M210 35h95" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+      <g transform="translate(325 0)">
+        <rect class="soft" width="190" height="70" rx="14"/><text x="22" y="30" class="label">02 Reserva</text><text x="22" y="52" class="muted" font-size="14">fecha y momento</text>
+      </g>
+      <path d="M535 35h95" stroke="#94a3b8" stroke-width="3"/>
+      <g transform="translate(650 0)">
+        <rect class="soft" width="190" height="70" rx="14"/><text x="22" y="30" class="label">03 Pago demo</text><text x="22" y="52" class="muted" font-size="14">estado visible</text>
+      </g>
+      <path d="M860 35h95" stroke="#94a3b8" stroke-width="3"/>
+      <g transform="translate(975 0)">
+        <rect class="soft" width="190" height="70" rx="14"/><text x="22" y="30" class="label">04 Admin</text><text x="22" y="52" class="muted" font-size="14">opera agenda</text>
+      </g>
+      <path d="M1185 35h95" stroke="#94a3b8" stroke-width="3"/>
+      <g transform="translate(1300 0)">
+        <rect class="soft" width="250" height="70" rx="14"/><text x="22" y="30" class="label">05 Reportes</text><text x="22" y="52" class="muted" font-size="14">ocupacion e ingresos</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Frame template: Landing -->
+  <g transform="translate(90 780)">
+    <rect class="frame shadow" width="1060" height="680" rx="26"/>
+    <text x="28" y="-22" class="ink" font-size="26">01 Landing comercial</text>
+    <rect x="0" y="0" width="1060" height="78" rx="26" fill="#fff"/>
+    <rect x="32" y="20" width="44" height="44" rx="10" fill="#059669"/>
+    <text x="43" y="49" class="white" font-size="18">EC</text>
+    <text x="92" y="35" class="ink" font-size="22">El Circulo</text>
+    <text x="92" y="58" class="tiny">FUTBOL CLUB</text>
+    <text x="690" y="46" class="text" font-size="16">Canchas</text>
+    <rect x="790" y="20" width="108" height="38" rx="8" fill="#ecfdf5" stroke="#bbf7d0"/>
+    <text x="820" y="45" class="label">Ingresar</text>
+    <rect x="912" y="20" width="116" height="38" rx="8" fill="#059669"/>
+    <text x="936" y="45" class="white" font-size="15">Crear cuenta</text>
+    <g transform="translate(36 100)">
+      <rect width="988" height="330" rx="18" fill="url(#field)"/>
+      <rect width="988" height="330" rx="18" fill="url(#heroOverlay)"/>
+      <rect x="40" y="38" width="908" height="254" rx="14" class="pitchLine"/>
+      <line x1="494" y1="38" x2="494" y2="292" class="pitchLine"/>
+      <circle cx="494" cy="165" r="74" class="pitchLine"/>
+      <text x="44" y="110" class="white" font-size="50">Reserva cancha</text>
+      <text x="44" y="150" class="white" font-size="50">sin perder tiempo.</text>
+      <text x="48" y="194" class="whiteText" font-size="20">Elegis formato, fecha y momento desde una experiencia clara.</text>
+      <rect x="48" y="230" width="140" height="46" rx="8" fill="#facc15"/><text x="72" y="260" class="dark" font-size="16" font-family="Inter,Arial" font-weight="900">Ver canchas</text>
+      <rect x="204" y="230" width="132" height="46" rx="8" fill="#fff" opacity=".13" stroke="#fff" stroke-opacity=".35"/><text x="234" y="260" class="white" font-size="16">Crear cuenta</text>
+    </g>
+    <g transform="translate(36 460)">
+      <rect class="panel" width="300" height="130" rx="14"/><text x="24" y="48" class="ink" font-size="22">Elegis cancha</text><text x="24" y="80" class="muted" font-size="16">Comparas formato y precio.</text>
+      <rect x="344" class="panel" width="300" height="130" rx="14"/><text x="368" y="48" class="ink" font-size="22">Marcas momento</text><text x="368" y="80" class="muted" font-size="16">Manana, tarde o noche.</text>
+      <rect x="688" class="panel" width="300" height="130" rx="14"/><text x="712" y="48" class="ink" font-size="22">Confirmas lugar</text><text x="712" y="80" class="muted" font-size="16">Reserva guardada al instante.</text>
+    </g>
+  </g>
+
+  <!-- Login -->
+  <g transform="translate(1250 780)">
+    <rect class="frame shadow" width="1060" height="680" rx="26"/>
+    <text x="28" y="-22" class="ink" font-size="26">02 Login y registro</text>
+    <g transform="translate(36 82)">
+      <rect width="470" height="520" rx="18" fill="url(#field)"/>
+      <rect width="470" height="520" rx="18" fill="url(#heroOverlay)"/>
+      <rect x="34" y="34" width="402" height="452" rx="14" class="pitchLine"/>
+      <text x="50" y="302" class="white" font-size="42">Entra y deja tu</text>
+      <text x="50" y="350" class="white" font-size="42">partido listo.</text>
+      <text x="52" y="392" class="whiteText" font-size="18">Reserva y consulta tu historial.</text>
+    </g>
+    <g transform="translate(550 82)">
+      <rect class="panel" width="470" height="520" rx="18"/>
+      <rect x="38" y="42" width="52" height="52" rx="10" fill="#ecfdf5" stroke="#bbf7d0"/>
+      <text x="38" y="140" class="ink" font-size="42">Ingresar</text>
+      <text x="38" y="178" class="muted" font-size="18">Accede a tu cuenta para reservar.</text>
+      <text x="38" y="240" class="tiny">Email</text><rect x="38" y="252" width="394" height="46" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+      <text x="56" y="281" class="text" font-size="16">cliente@demo.com</text>
+      <text x="38" y="336" class="tiny">Contrasena</text><rect x="38" y="348" width="394" height="46" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+      <text x="56" y="378" class="text" font-size="18">••••••••</text>
+      <rect x="38" y="424" width="394" height="48" rx="8" fill="#059669"/><text x="198" y="455" class="white" font-size="16">Ingresar</text>
+    </g>
+  </g>
+
+  <!-- Canchas -->
+  <g transform="translate(90 1540)">
+    <rect class="frame shadow" width="1060" height="680" rx="26"/>
+    <text x="28" y="-22" class="ink" font-size="26">03 Vista cliente - canchas</text>
+    <text x="36" y="66" class="ink" font-size="42">Elegi tu cancha</text>
+    <text x="36" y="100" class="muted" font-size="18">Futbol 5, 7 u 11. Reservas por manana, tarde o noche.</text>
+    <rect x="830" y="48" width="150" height="76" rx="14" class="panel"/>
+    <text x="860" y="78" class="tiny">Turnos</text><text x="862" y="112" class="ink" font-size="26">3 por dia</text>
+    <g transform="translate(36 150)">
+      <g>
+        <rect class="panel" width="300" height="430" rx="16"/>
+        <rect width="300" height="160" rx="16" fill="url(#field)"/>
+        <rect x="24" y="24" width="252" height="112" rx="9" class="pitchLine"/>
+        <text x="24" y="214" class="ink" font-size="24">Cancha 1</text>
+        <text x="24" y="246" class="muted" font-size="15">Cancha sintetica para futbol 5.</text>
+        <rect x="24" y="294" width="252" height="42" rx="8" fill="#f8fafc"/>
+        <text x="46" y="321" class="text" font-size="15">El Circulo Futbol</text>
+        <text x="24" y="374" class="tiny">PRECIO</text><text x="24" y="404" class="ink" font-size="28">$ 65.000</text>
+      </g>
+      <g transform="translate(344 0)">
+        <rect class="panel" width="300" height="430" rx="16"/>
+        <rect width="300" height="160" rx="16" fill="url(#field)"/>
+        <rect x="24" y="24" width="252" height="112" rx="9" class="pitchLine"/>
+        <text x="24" y="214" class="ink" font-size="24">Cancha 2</text>
+        <text x="24" y="246" class="muted" font-size="15">Cancha amplia para futbol 7.</text>
+        <rect x="24" y="294" width="252" height="42" rx="8" fill="#f8fafc"/>
+        <text x="46" y="321" class="text" font-size="15">El Circulo Futbol</text>
+        <text x="24" y="374" class="tiny">PRECIO</text><text x="24" y="404" class="ink" font-size="28">$ 120.000</text>
+      </g>
+      <g transform="translate(688 0)">
+        <rect class="panel" width="300" height="430" rx="16"/>
+        <rect width="300" height="160" rx="16" fill="url(#field)"/>
+        <rect x="24" y="24" width="252" height="112" rx="9" class="pitchLine"/>
+        <text x="24" y="214" class="ink" font-size="24">Cancha 3</text>
+        <text x="24" y="246" class="muted" font-size="15">Cancha 11 contra 11.</text>
+        <rect x="24" y="294" width="252" height="42" rx="8" fill="#f8fafc"/>
+        <text x="46" y="321" class="text" font-size="15">El Circulo Futbol</text>
+        <text x="24" y="374" class="tiny">PRECIO</text><text x="24" y="404" class="ink" font-size="28">$ 200.000</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Reserve detail -->
+  <g transform="translate(1250 1540)">
+    <rect class="frame shadow" width="1060" height="680" rx="26"/>
+    <text x="28" y="-22" class="ink" font-size="26">04 Reserva de cancha</text>
+    <g transform="translate(36 80)">
+      <rect class="panel" width="458" height="520" rx="18"/>
+      <rect width="458" height="205" rx="18" fill="url(#field)"/>
+      <rect x="26" y="28" width="406" height="150" rx="10" class="pitchLine"/>
+      <text x="34" y="270" class="ink" font-size="38">Cancha 1</text>
+      <text x="34" y="308" class="muted" font-size="18">Cancha sintetica para futbol 5.</text>
+      <rect x="34" y="350" width="390" height="120" rx="12" class="dark"/>
+      <text x="58" y="388" class="whiteText" font-size="14">PRECIO DEL TURNO</text>
+      <text x="58" y="440" class="white" font-size="42">$ 65.000</text>
+    </g>
+    <g transform="translate(536 80)">
+      <rect class="panel" width="488" height="520" rx="18"/>
+      <text x="34" y="74" class="ink" font-size="36">Elegi dia y momento</text>
+      <text x="34" y="112" class="muted" font-size="18">Solo mostramos turnos disponibles.</text>
+      <text x="34" y="170" class="tiny">Fecha</text>
+      <rect x="34" y="184" width="420" height="48" rx="8" fill="#fff" stroke="#cbd5e1"/>
+      <text x="52" y="214" class="text" font-size="18">26/05/2026</text>
+      <text x="34" y="278" class="tiny">Momento</text>
+      <rect x="34" y="294" width="124" height="82" rx="12" fill="#ecfdf5" stroke="#34d399"/><text x="56" y="328" class="label">Manana</text><text x="56" y="352" class="muted" font-size="13">Temprano</text>
+      <rect x="178" y="294" width="124" height="82" rx="12" fill="#fff" stroke="#dbe5e1"/><text x="208" y="328" class="text" font-size="16" font-weight="800">Tarde</text><text x="204" y="352" class="muted" font-size="13">Amigos</text>
+      <rect x="322" y="294" width="132" height="82" rx="12" fill="#fff" stroke="#dbe5e1"/><text x="358" y="328" class="text" font-size="16" font-weight="800">Noche</text><text x="348" y="352" class="muted" font-size="13">Cierre</text>
+      <rect x="34" y="420" width="420" height="52" rx="8" fill="#059669"/><text x="170" y="452" class="white" font-size="17">Confirmar reserva</text>
+    </g>
+  </g>
+
+  <!-- Admin -->
+  <g transform="translate(90 2300)">
+    <rect class="frame shadow" width="1060" height="760" rx="26"/>
+    <text x="28" y="-22" class="ink" font-size="26">05 Panel admin operativo</text>
+    <text x="36" y="62" class="ink" font-size="42">Panel admin</text>
+    <text x="36" y="96" class="muted" font-size="18">Gestion de canchas, disponibilidad y reservas.</text>
+    <g transform="translate(36 130)">
+      <rect class="panel" width="220" height="98" rx="14"/><text x="22" y="36" class="tiny">Canchas disponibles</text><text x="22" y="72" class="ink" font-size="30">3/7</text>
+      <rect x="250" class="panel" width="220" height="98" rx="14"/><text x="272" y="36" class="tiny">Reservas activas</text><text x="272" y="72" class="ink" font-size="30">7</text>
+      <rect x="500" class="panel" width="220" height="98" rx="14"/><text x="522" y="36" class="tiny">Pendientes pago</text><text x="522" y="72" class="ink" font-size="30">0</text>
+      <rect x="750" class="panel" width="238" height="98" rx="14"/><text x="772" y="36" class="tiny">Importe activo</text><text x="772" y="72" class="ink" font-size="30">$182.000</text>
+    </g>
+    <g transform="translate(36 260)">
+      <rect class="panel" width="380" height="430" rx="16"/>
+      <text x="24" y="42" class="ink" font-size="26">Nueva cancha</text>
+      <text x="24" y="74" class="muted" font-size="15">Alta, edicion y baja logica.</text>
+      <text x="24" y="120" class="tiny">Nombre</text><rect x="24" y="134" width="332" height="42" rx="8" fill="#fff" stroke="#cbd5e1"/>
+      <text x="24" y="214" class="tiny">Tipo</text><rect x="24" y="228" width="150" height="42" rx="8" fill="#fff" stroke="#cbd5e1"/>
+      <text x="196" y="214" class="tiny">Precio</text><rect x="196" y="228" width="160" height="42" rx="8" fill="#fff" stroke="#cbd5e1"/>
+      <text x="24" y="308" class="tiny">Descripcion</text><rect x="24" y="322" width="332" height="70" rx="8" fill="#fff" stroke="#cbd5e1"/>
+    </g>
+    <g transform="translate(450 260)">
+      <rect class="panel" width="538" height="430" rx="16"/>
+      <text x="24" y="42" class="ink" font-size="26">Agenda y filtros</text>
+      <text x="24" y="74" class="muted" font-size="15">Calendario y listado vinculado.</text>
+      <g transform="translate(24 104)">
+        <rect x="0" y="0" width="490" height="52" rx="10" fill="#f8fafc" stroke="#dbe5e1"/>
+        <text x="18" y="32" class="muted" font-size="15">Buscar cliente, cancha o estado</text>
+      </g>
+      <g transform="translate(24 190)">
+        <rect width="490" height="190" rx="12" fill="#fff" stroke="#dbe5e1"/>
+        <text x="22" y="36" class="ink" font-size="22">mayo de 2026</text>
+        <g transform="translate(22 62)">
+          <rect width="60" height="44" rx="8" fill="#ecfdf5"/><text x="22" y="28" class="label">4</text>
+          <rect x="72" width="60" height="44" rx="8" fill="#f8fafc"/><text x="94" y="28" class="text" font-size="15">5</text>
+          <rect x="144" width="60" height="44" rx="8" fill="#f8fafc"/><text x="166" y="28" class="text" font-size="15">6</text>
+          <rect x="216" width="60" height="44" rx="8" fill="#ecfdf5"/><text x="238" y="28" class="label">7</text>
+          <rect x="288" width="60" height="44" rx="8" fill="#f8fafc"/><text x="310" y="28" class="text" font-size="15">8</text>
+        </g>
+        <rect x="22" y="128" width="446" height="42" rx="8" fill="#f8fafc"/><text x="42" y="154" class="text" font-size="15">Cancha 1 · Cliente Demo · Noche · $65.000</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Users and reports -->
+  <g transform="translate(1250 2300)">
+    <rect class="frame shadow" width="1060" height="760" rx="26"/>
+    <text x="28" y="-22" class="ink" font-size="26">06 Usuarios y reportes</text>
+    <g transform="translate(36 54)">
+      <rect class="panel" width="470" height="640" rx="18"/>
+      <text x="28" y="52" class="ink" font-size="34">Usuarios</text>
+      <text x="28" y="86" class="muted" font-size="17">Roles, estado y acceso.</text>
+      <rect x="28" y="124" width="128" height="72" rx="12" fill="#f8fafc" stroke="#dbe5e1"/><text x="48" y="154" class="tiny">Totales</text><text x="48" y="184" class="ink" font-size="26">11</text>
+      <rect x="174" y="124" width="128" height="72" rx="12" fill="#f8fafc" stroke="#dbe5e1"/><text x="194" y="154" class="tiny">Activos</text><text x="194" y="184" class="ink" font-size="26">9</text>
+      <rect x="28" y="232" width="414" height="70" rx="12" fill="#fff" stroke="#dbe5e1"/><text x="50" y="262" class="ink" font-size="20">Super Admin</text><text x="50" y="286" class="muted" font-size="14">superadmin@demo.com</text>
+      <rect x="28" y="318" width="414" height="70" rx="12" fill="#ecfdf5" stroke="#bbf7d0"/><text x="50" y="348" class="ink" font-size="20">Admin Cancha</text><text x="50" y="372" class="muted" font-size="14">admin@demo.com</text>
+      <rect x="28" y="404" width="414" height="70" rx="12" fill="#fff" stroke="#dbe5e1"/><text x="50" y="434" class="ink" font-size="20">Cliente Demo</text><text x="50" y="458" class="muted" font-size="14">cliente@demo.com</text>
+    </g>
+    <g transform="translate(554 54)">
+      <rect class="panel" width="470" height="640" rx="18"/>
+      <text x="28" y="52" class="ink" font-size="34">Reportes</text>
+      <text x="28" y="86" class="muted" font-size="17">Indicadores del complejo.</text>
+      <rect x="28" y="124" width="190" height="96" rx="12" fill="#f8fafc" stroke="#dbe5e1"/><text x="48" y="158" class="tiny">Reservas periodo</text><text x="48" y="196" class="ink" font-size="32">25</text>
+      <rect x="252" y="124" width="190" height="96" rx="12" fill="#f8fafc" stroke="#dbe5e1"/><text x="272" y="158" class="tiny">Ingresos</text><text x="272" y="196" class="ink" font-size="32">$345k</text>
+      <text x="28" y="280" class="ink" font-size="22">Reservas por estado</text>
+      <rect x="28" y="312" width="414" height="12" rx="6" fill="#ecfdf5"/><rect x="28" y="312" width="210" height="12" rx="6" fill="#10b981"/>
+      <rect x="28" y="356" width="414" height="12" rx="6" fill="#ecfdf5"/><rect x="28" y="356" width="310" height="12" rx="6" fill="#10b981"/>
+      <rect x="28" y="400" width="414" height="12" rx="6" fill="#ecfdf5"/><rect x="28" y="400" width="140" height="12" rx="6" fill="#10b981"/>
+      <text x="28" y="486" class="ink" font-size="22">Proximas reservas activas</text>
+      <rect x="28" y="516" width="414" height="70" rx="12" fill="#f8fafc" stroke="#dbe5e1"/><text x="50" y="546" class="ink" font-size="18">Cancha 1</text><text x="50" y="570" class="muted" font-size="14">Cliente Demo · noche</text>
+    </g>
+  </g>
+
+  <text x="90" y="3160" class="muted" font-size="18">Nota: este SVG esta preparado para importar en Figma y explicar el producto completo con sus vistas principales.</text>
+</svg>
